@@ -74,17 +74,10 @@
 <a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/typescript/typescript-original.svg" alt="typescript" width="40" height="40"/> </a> 
 <!-- <a href="https://unrealengine.com/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/kenangundogan/fontisto/036b7eca71aab1bef8e6a0518f7329f13ed62f6b/icons/svg/brand/unreal-engine.svg" alt="unreal" width="40" height="40"/> </a>  -->
 </p>
-
-<details>
-  <summary> Github Stats & Metrices</summary>
-  
-  ![Metrics](https://metrics.lecoq.io/UdaykiranReddy-1?template=classic&isocalendar=1&languages=1&introduction=1&followup=1&lines=1&achievements=1&isocalendar.duration=half-year&languages.limit=8&languages.sections=most-used&languages.colors=github&languages.threshold=0%25&languages.indepth=false&languages.recent.load=300&languages.recent.days=14&introduction.title=true&followup.sections=repositories&achievements.threshold=C&achievements.secrets=true&achievements.limit=0&config.timezone=Asia%2FKolkata)
-  
-  <p align="center"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=UdaykiranReddy-1" alt="UdaykiranReddy-1" /></a> </p>
-  
-  </details>
+<h3 align="left">Github Stats,Metrics and Achievements :</h3>
+<p align="center"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=UdaykiranReddy-1" alt="UdaykiranReddy-1" /></a> </p>
 <a href = "https://github.com/UdaykiranReddy-1" align="center"><img src="https://github-readme-stats.vercel.app/api?username=UdaykiranReddy-1&show_icons=true&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515&count_private=true&include_all_commits=false"></a>
-<a href = "https://github.com/UdaykiranReddy-1" align="center><img src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&&langs_count=8&layout=compact&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515"></a>
+<a href = "https://github.com/UdaykiranReddy-1" align="center"><img src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&&langs_count=8&layout=compact&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515"></a>
 <br />
 <hr />
 
