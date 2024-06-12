@@ -18,7 +18,7 @@
 
 - 👯 I’m looking to collaborate on: **Building innovative web applications and solutions**
 
-- 👨‍💻 Some of my basic projects are available as public repositories: [here](https://github.com/UdaykiranReddy-1)
+- 👨‍💻 Some of my basic projects are available as public repositories: [here](https://github.com/UdaykiranReddy-1?tab=repositories)
 
 <h3 align="left">Languages and Tools:</h3>
 <p align="left"> 
