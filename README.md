@@ -84,7 +84,7 @@
 
 
 <h4 align="center"> Thank you for visiting my profile! Feel free to browse my repositories and let's connect!  </h4>
-<h4 align="center"> Show your support by starring ⭐ some repositories if you find it useful ! </h4>
+<h4 align="center"> Show your support by starring ⭐ some repositories if you find it useful </h4>
 
 
 
