@@ -7,7 +7,7 @@
   <a href="mailto:uday410ry@gmail.com" target="blank"><img align="center" src="https://img.shields.io/badge/gmail-D14836?&style=for-the-badge&logo=gmail&logoColor=white" /></a>
 </p>
 
-<p align="justify">Hey there👋 ,<br/>I am Uday Kiran Reddy From India. I am a Full stack developer with broad-based experience in building data-intensive applications and overcoming complex architectural, and scalability issues in diverse industries. Capable of creating, developing, testing, and deploying highly adaptive diverse services to translate business and functional qualifications into substantial deliverables. </p>
+<p align="justify">Hey there👋 ,<br/>I am Uday from Bangalore, India. I am a Full stack developer with broad-based experience in building interactive and data-intensive applications , and also overcoming complex architectural, and scalability issues in diverse industries. Capable of creating, developing, testing, and deploying highly adaptive diverse services to translate business and functional qualifications into substantial deliverables. </p>
 
 
  <img align="right" alt="GIF" src="https://github.com/UdaykiranReddy-1/UdaykiranReddy-1/blob/master/code.gif" width="500" height="320" />
