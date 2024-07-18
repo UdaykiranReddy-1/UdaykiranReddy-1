@@ -1,7 +1,7 @@
 ### Hello  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="25"> World <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24"> 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=UdaykiranReddy-1&label=Profile%20views&color=0e75b6&style=flat" alt="UdaykiranReddy-1" /> </p>
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?color=233CF7&center=true&vCenter=true&height=60&width=1000&lines=I+am+Uday+Kiran+Reddy;A+FullStack+Developer;A+Learner;A+Data+Enthusiast;)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?color=233CF7&center=true&vCenter=true&height=60&width=1000&lines=I+am+Uday+Kiran+Reddy+N;A+FullStack+Developer;A+Learner;A+Data+Enthusiast;A+Code+Lover)](https://git.io/typing-svg)
 
 <p align="center">
   <a href="mailto:uday410ry@gmail.com" target="blank"><img align="center" src="https://img.shields.io/badge/gmail-D14836?&style=for-the-badge&logo=gmail&logoColor=white" /></a>
