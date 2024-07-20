@@ -22,7 +22,7 @@
 
 <h3 align="left">Languages and Tools I'm familiar with:</h3>
 <p align="center"> 
-  <img src="https://skillicons.dev/icons?i=aws,gcp,azure,vercel,c,cpp,java,py,go,solidity,git,github,html,css,tailwind,js,ts,nodejs,react,vite,express,mongodb,mysql,nextjs,nginx,postgres,redis,firebase,flask,spring,sqlite,docker,kubernetes,kafka,rabbitmq,sklearn,pytorch,linux,windows,vscode,md,matlab,npm,figma,regex,postman&perline=10&theme=dark" width="40" height="40"/>
+  <img src="https://skillicons.dev/icons?i=aws,gcp,azure,vercel,c,cpp,java,py,go,solidity,git,github,html,css,tailwind,js,ts,nodejs,react,vite,express,mongodb,mysql,nextjs,nginx,postgres,redis,firebase,flask,spring,sqlite,docker,kubernetes,kafka,rabbitmq,sklearn,pytorch,linux,windows,vscode,md,matlab,npm,figma,regex,postman&perline=15&theme=dark"/>
 </p>
 <br />
 <h3 align="left">Github achievements , metrics & stats:</h3>
