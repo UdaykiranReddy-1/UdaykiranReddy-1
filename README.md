@@ -28,11 +28,11 @@
 <h3 align="left">Github achievements , metrics & stats:</h3>
 <p align="center"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=UdaykiranReddy-1" alt="UdaykiranReddy-1" /></a> </p>
 <p align="center">
-   <a href="https://github.com/UdaykiranReddy-1">
-    <img src="https://github-readme-stats.vercel.app/api?username=UdaykiranReddy-1&theme=nord" style="height: 200px;" />
+  <a href="https://github.com/UdaykiranReddy-1">
+    <img src="https://github-readme-stats.vercel.app/api?username=UdaykiranReddy-1&show_icons=true&title_color=00ffff&icon_color=8ac926&text_color=89CFF0&bg_color=7393B3&count_private=true&include_all_commits=false" style="height: 200px;" />
   </a>
   <a href="https://github.com/UdaykiranReddy-1">
-    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&theme=nord" style="height: 200px;" />
+    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&&langs_count=8&layout=compact&title_color=00ffff&icon_color=8ac926&text_color=89CFF0&bg_color=7393B3" style="height: 200px;" />
   </a>
 </p>
 </div>
