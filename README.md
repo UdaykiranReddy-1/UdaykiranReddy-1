@@ -27,9 +27,14 @@
 <br />
 <h3 align="left">Github achievements , metrics & stats:</h3>
 <p align="center"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=UdaykiranReddy-1" alt="UdaykiranReddy-1" /></a> </p>
-<div style="display:flex;justify-content:space-between">
-  <p align="center"><a href = "https://github.com/UdaykiranReddy-1" ><img src="https://github-readme-stats.vercel.app/api?username=UdaykiranReddy-1&show_icons=true&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515&count_private=true&include_all_commits=false"></a></p>
-<p align="center"><a href = "https://github.com/UdaykiranReddy-1" align="center"><img src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&&langs_count=8&layout=compact&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515"></a></p>
+<p align="center">
+  <a href="https://github.com/UdaykiranReddy-1">
+    <img src="https://github-readme-stats.vercel.app/api?username=UdaykiranReddy-1&show_icons=true&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515&count_private=true&include_all_commits=false" />
+  </a>
+  <a href="https://github.com/UdaykiranReddy-1">
+    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&&langs_count=8&layout=compact&title_color=ffc857&icon_color=8ac926&text_color=daf7dc&bg_color=151515" />
+  </a>
+</p>
 </div>
 <br />
 <hr />
