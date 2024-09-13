@@ -11,10 +11,9 @@
 
 
  <img align="right" alt="GIF" src="https://github.com/UdaykiranReddy-1/UdaykiranReddy-1/blob/master/code.gif" width="500" height="320" />
+ <!-- - 🌱 I’m currently learning about : **** -->
 
 - 🔭 I’m currently working on: **Building Next.js Projects**
-
-<!-- - 🌱 I’m currently learning about : **** -->
 
 - 👯 I’m looking to collaborate on: **Building innovative web applications and solutions**
 
