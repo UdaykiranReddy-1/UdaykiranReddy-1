@@ -10,11 +10,12 @@
 <p align="justify">Hey there👋 ,<br/>I am Uday from Bangalore, India. I am a Full stack developer with broad-based experience in building interactive and functionally-packed applications. Capable of creating, developing, testing, and deploying highly adaptive diverse services to translate business and functional qualifications into substantial deliverables. </p>
 
 
+
  <img align="right" alt="GIF" src="https://github.com/UdaykiranReddy-1/UdaykiranReddy-1/blob/master/code.gif" width="500" height="320" />
  <!--  -->
 
 - 🔭 I’m currently working on: **Building Next.js Projects**
-  
+
 - 🌱 I’m currently learning : **System Design**
 
 - 👯 I’m looking to collaborate on: **Building innovative web applications and solutions**
