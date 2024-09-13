@@ -12,14 +12,10 @@
 
 
  <img align="right" alt="GIF" src="https://github.com/UdaykiranReddy-1/UdaykiranReddy-1/blob/master/code.gif" width="500" height="320" />
- <!--  -->
 
 - 🔭 I’m currently working on: **Building Next.js Projects**
-
 - 🌱 I’m currently learning: **System Design**
-
 - 👯 I’m looking to collaborate on: **Building innovative web applications and solutions**
-
 - 👨‍💻 Some of my basic projects are available as public repositories: [here](https://github.com/UdaykiranReddy-1?tab=repositories)
 
 <h3 align="left">Languages and Tools I'm familiar with:</h3>
