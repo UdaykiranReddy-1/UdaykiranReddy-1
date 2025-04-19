@@ -43,8 +43,8 @@
 
  
 ### 💡What I'm Up To
-- 🔭 Currently Working On: **Next.js & Scalable Web Apps**
-- 🌱 Currently Learning: **Advanced System Design**
+- 🔭 Currently Working On: **Some side projects**
+- 🌱 Currently Learning: **Advanced System Design & Cloud**
 - 👯 Looking to Collaborate On: **Innovative Full-Stack & AI-powered projects**
 - 👨‍💻 My Public Projects: [GitHub Repositories](https://github.com/UdaykiranReddy-1?tab=repositories)
 
