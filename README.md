@@ -1,109 +1,53 @@
-## Hello, World!  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="25">
-<!-- <p align="left"> <img src="https://komarev.com/ghpvc/?username=UdaykiranReddy-1&label=Profile%20views&color=0e75b6&style=flat" alt="UdaykiranReddy-1" /> </p> -->
+# Uday Kiran Reddy N
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?color=FFFFFF&center=true&vCenter=true&height=60&width=1000&lines=I+am+Uday+Kiran+Reddy+N;A+FullStack+Developer;A+Curious+Learner;A+Database+Enthusiast;A+Code+Lover)](https://git.io/typing-svg)
+I code and decode stuff. Full-stack developer in Bangalore — about three years of building software, a year and a half of that in industry — looking for full-stack roles where AI is part of the work.
 
+[GitHub](https://github.com/UdaykiranReddy-1) · [LinkedIn](https://www.linkedin.com/in/uday-kiran-reddy-n-7845b0280/) · [uday410ry@gmail.com](mailto:uday410ry@gmail.com)
 
-<!-- Connect with me div -->
-<div>
-  <div align="center">
-  <!-- Github link -->
-    <a href="https://github.com/UdaykiranReddy-1" target="_blank">
-      <img src=https://img.shields.io/badge/github-%232E3440.svg?&style=for-the-badge&logo=github&logoColor=white alt=github style="margin-bottom: 5px;" />
-    </a>
-    <!-- Linkedin Link -->
-    <a href="https://www.linkedin.com/in/uday-kiran-reddy-n-7845b0280/" target="_blank">
-      <img src=https://img.shields.io/badge/linkedin-%232E3440.svg?&style=for-the-badge&logo=linkedin&logoColor=white alt=linkedin style="margin-bottom: 5px;" />
-    </a>
-    <!-- Twitter link -->
-<!--     <a href="https://twitter.com/adithya_s_k" target="_blank">
-      <img src=https://img.shields.io/badge/twitter-%232E3440.svg?&style=for-the-badge&logo=twitter&logoColor=white alt=twitter style="margin-bottom: 5px;" />
-    </a> -->
-    
-  <a href="mailto:uday410ry@gmail.com" target="blank">
-    <img src="https://img.shields.io/badge/gmail-%232E3440.svg?&style=for-the-badge&logo=gmail&logoColor=white" style="margin-bottom: 5px;" />
-  </a>
+**Stack, from the public repos.** TypeScript, JavaScript, Python, and Java, with some Go and C. React and Next.js up front. Node, Express, and Spring Boot behind them. Postgres, Prisma, and MongoDB when a project needs a database.
 
-  <a href="">
-      <img src=https://img.shields.io/badge/follow-%232E87FB.svg?&style=for-the-badge&logo=&logoColor=white alt=follow style="margin-bottom: 5px;" />
-</a>
+## Silk Board
 
-  
-  </div>
-</div>
+The flyover is the public contribution graph for the last seven days. A commit sends a vehicle onto Outer Ring Road — a bike, an auto, cars, or a bus once the day is actually busy. An empty day leaves a pothole. An empty Sunday leaves a cow. The sign at the bottom is regenerated every morning from the GitHub contribution calendar.
 
+<!-- silk-board:start -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/silk-board-dark.svg">
+  <img alt="Silk Board junction in Bengaluru. Traffic status CLEARING, ETA 26 minutes. Saturday left 7 vehicles in the box. Today is a pothole. Vehicles stand in for GitHub contributions over the last 7 days." src="assets/silk-board-light.svg" width="100%">
+</picture>
+<!-- silk-board:end -->
 
-### 👋About Me
+## Ask this README
 
-<p align="justify">Hey there! I’m Uday, a Full-Stack Developer from Bangalore, India 🇮🇳. I love building scalable applications, optimizing backend performance, and experimenting with AI & cloud solutions.
+Open an issue with the **Ask Uday's README** template and ask about the work, the stack, or the projects. A workflow answers in a comment from public repos only: names, descriptions, languages, READMEs, and recent activity. If that data does not cover the question, the answer is "I don't know".
 
-> 🚀 Passionate about crafting high-performance, user-centric applications with a deep focus on backend efficiency, database management, and cloud computing. </p>
+It ignores issues that are not the template and do not carry the `ask-readme` label. Questions longer than 500 characters are declined. Five answers a day, then the junction is closed until tomorrow. The question is treated as data, not as instructions.
 
-<!-- <img align="right" alt="GIF" src="https://github.com/UdaykiranReddy-1/UdaykiranReddy-1/blob/master/code.gif" width="500" height="320" /> -->
+<!-- qa:start -->
+No questions yet. Be the first one through the signal.
 
- 
-### 💡What I'm Up To
-- 🔭 Currently Working On: **Some side projects**
-- 🌱 Currently Learning: **Advanced System Design & Cloud**
-- 👯 Looking to Collaborate On: **Innovative Full-Stack & AI-powered projects**
-- 👨‍💻 My Public Projects: [GitHub Repositories](https://github.com/UdaykiranReddy-1?tab=repositories)
+<!-- qa:end -->
 
-### 🛠️Tech Stack & Tools:
-<p align="center"> 
-  <img src="https://skillicons.dev/icons?i=aws,vercel,c,cpp,java,py,go,solidity,git,github,html,css,tailwind,js,ts,nodejs,react,vite,express,spring,nextjs,mongodb,mysql,postgres,redis,firebase,sqlite,docker,kubernetes,gitlab,jenkins,nginx,kafka,rabbitmq,linux,windows,vscode,md,npm,figma,regex,postman&perline=15&theme=dark"/>
-</p>
-<br />
+## Selected work
 
-### 🏆GitHub Achievements & Stats
+**[Serenity.ai](https://github.com/UdaykiranReddy-1/Serenity.ai)** — A healthcare web app: an AI chatbot, a DASS-21 scoring flow, and a view for doctors. Next.js, MongoDB, and Botpress. [Demo](https://serenityai-42c1.vercel.app/)
 
-<table>
-  <tr>
-    <td colspan="2">
-      <a href="">
-        <img src="https://github-profile-trophy.vercel.app/?username=UdaykiranReddy-1&hide_border=true&count_private=true&column=-1&theme=nord&no-frame=true" alt="UdaykiranReddy-1">
-      </a>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <a href="">
-        <img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=UdaykiranReddy-1&bg_color=2e3440&hide_border=true&point=false&line=88c0d0&radius=8&area=true&area_color=88c0d0&title_color=ffffff&color=ffffff">
-      </a>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <a href="">
-        <img src="https://streak-stats.demolab.com?user=UdaykiranReddy-1&theme=nord&hide_border=true">
-      </a>
-    </td>
-    <td>
-      <a href="">
-        <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=UdaykiranReddy-1&theme=nord_dark">
-      </a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <a href="">
-        <img style="align:center;" src="https://github-readme-stats.vercel.app/api/top-langs/?username=UdaykiranReddy-1&&langs_count=5&layout=donut&hide_border=true&count_private=true&theme=nord&line_height=20" />
-      </a>
-    </td>
-    <td align="center">
-      <a href="">
-        <img  src="https://github-readme-stats.vercel.app/api?username=UdaykiranReddy-1&show_icons=true&count_private=true&theme=nord&title_color=ffffff&text_bold=false&hide_rank=true" />
-      </a>
-    </td>
-  </tr>
-</table>
+**[rbac-project](https://github.com/UdaykiranReddy-1/rbac-project)** — Multi-tenant role-based access control for a SaaS backend. TypeScript, Express, PostgreSQL, Prisma, and JWT.
 
- 
-<br />
-<hr />
+**[WanderLust](https://github.com/UdaykiranReddy-1/WanderLust)** — Tour bookings on the MERN stack, with a separate client and server.
 
+**[the-world](https://github.com/UdaykiranReddy-1/the-world)** — A React country browser on the REST Countries API, with filters and a Leaflet map. [Demo](https://the-world-rho.vercel.app)
 
-<h4 align="center"> Thank you for visiting my profile! Feel free to browse my repositories and let's connect!  </h4>
-<h4 align="center"> Show your support by starring ⭐ some repositories if you find it useful </h4>
+**[POS-Frontend](https://github.com/UdaykiranReddy-1/POS-Frontend)** — Blockzy, a JavaScript simulation of Ethereum proof-of-stake: blocks, staking, and wallets. [Demo](https://pos-isfcr.vercel.app)
 
+**[learnsz](https://github.com/UdaykiranReddy-1/learnsz)** — LearnLock, a Solana learning passport. Soul-bound tokens for finishing micro-lessons, and a small marketplace for creators.
 
+Also on the account: [sql-executor](https://github.com/UdaykiranReddy-1/sql-executor) (a Spring Boot service that runs a query and returns rows), [Http-Server-Go](https://github.com/UdaykiranReddy-1/Http-Server-Go) (an HTTP server built up in stages), and [PyScripts](https://github.com/UdaykiranReddy-1/PyScripts) (small automation scripts).
 
+## Now
+
+Side projects. Learning system design and cloud. Happy to collaborate on full-stack work that actually uses AI.
+
+---
+
+Silk Board is redrawn by a scheduled Action. Questions are answered by another. Both commit their results back here.

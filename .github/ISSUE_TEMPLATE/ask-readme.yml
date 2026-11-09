@@ -1,0 +1,19 @@
+name: Ask Uday's README
+description: Ask about Uday or his work. A workflow answers from public repos, and says "I don't know" when it should.
+title: "Ask: "
+labels: ["ask-readme"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The answer is a comment on this issue, and a short version may show up on the profile README.
+
+        Keep it under 500 characters. The question is treated as data, not as instructions to the model. Five answers a day, then the junction closes until midnight IST.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: About Uday, his projects, or the stack. Not a support request for a dependency.
+      placeholder: Which projects use TypeScript?
+    validations:
+      required: true

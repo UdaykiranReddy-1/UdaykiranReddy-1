@@ -1,0 +1,59 @@
+# Answers issues opened with the Ask Uday's README template.
+# Auth is the workflow GITHUB_TOKEN plus models:read. No extra API key.
+name: Ask my README
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to answer
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  models: read
+
+concurrency:
+  group: profile-readme
+  cancel-in-progress: false
+
+jobs:
+  answer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Answer the issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+        run: python scripts/ask_readme.py
+
+      - name: Commit the Q&A log
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md assets/qa.json assets/qa-state.json
+          if git diff --cached --quiet; then
+            echo "No Q&A changes."
+            exit 0
+          fi
+          git commit -m "docs: update ask-readme log"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push

@@ -1,0 +1,51 @@
+# Redraws assets/silk-board-light.svg and assets/silk-board-dark.svg from the
+# public contribution calendar. The workflow token is enough for public data.
+name: Silk Board
+
+on:
+  schedule:
+    # 07:45 IST. The date on the board is Asia/Kolkata.
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Shared with Ask my README so the two jobs don't commit README.md at once.
+concurrency:
+  group: profile-readme
+  cancel-in-progress: false
+
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Draw the junction
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python scripts/silk_board.py
+
+      - name: Commit the board
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/silk-board-light.svg assets/silk-board-dark.svg cache/contributions.json README.md
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -m "chore: redraw Silk Board"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push
