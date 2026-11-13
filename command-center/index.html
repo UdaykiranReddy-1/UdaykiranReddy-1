@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Morning Command Center</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>Morning Command Center</h1>
+      <p class="subtitle">Uday Kiran Reddy · Asia/Calcutta</p>
+    </header>
+    <main id="command-center-root" class="command-center-root" aria-live="polite">
+      <section id="panel-today" class="panel-slot" data-panel="today"></section>
+      <section id="panel-schedule" class="panel-slot" data-panel="schedule"></section>
+      <section id="panel-reminders" class="panel-slot" data-panel="reminders"></section>
+      <section id="panel-commute" class="panel-slot" data-panel="commute"></section>
+      <section id="panel-quick-links" class="panel-slot" data-panel="quick-links"></section>
+      <section id="panel-focus" class="panel-slot" data-panel="focus"></section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
