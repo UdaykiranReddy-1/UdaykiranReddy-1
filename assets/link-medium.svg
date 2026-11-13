@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="71" height="24" viewBox="0 0 71 24">
+<svg xmlns="http://www.w3.org/2000/svg" width="76" height="24" viewBox="0 0 76 24">
 
 <defs>
   <style type="text/css">
@@ -26,6 +26,6 @@ text { font-synthesis: none; }
   </filter>
 </defs>
 
-<g transform="translate(1.0000,10.8277) scale(0.007345)"><circle cx="500" cy="500" r="500" fill="#58a6ff"/><ellipse cx="1296" cy="501" rx="250" ry="475" fill="#58a6ff"/><ellipse cx="1682" cy="502" rx="88" ry="424" fill="#58a6ff"/></g>
-<text x="22.00" y="18.00" fill="#58a6ff" font-family="JB" font-size="13.5" font-weight="450" text-anchor="start" xml:space="preserve">Medium</text>
+<g transform="translate(0.5300,8.5000) scale(0.011000) translate(0.0000,0.0000)"><circle cx="500" cy="500" r="500" fill="#58a6ff"/><ellipse cx="1296" cy="501" rx="250" ry="475" fill="#58a6ff"/><ellipse cx="1682" cy="502" rx="88" ry="424" fill="#58a6ff"/></g>
+<text x="27.00" y="18.00" fill="#58a6ff" font-family="JB" font-size="13.5" font-weight="450" text-anchor="start" xml:space="preserve">Medium</text>
 </svg>

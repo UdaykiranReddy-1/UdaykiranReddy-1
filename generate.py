@@ -190,7 +190,86 @@ ICON_LINKEDIN = (
     "-3.22-2.73-3.22-1.26 0-1.82.7-2.14 1.18V6.2H6.64c.03.66 0 7.3 0 7.3h2.3V9.54"
     "c0-.21.02-.42.08-.57.17-.42.56-.86 1.22-.86.86 0 1.2.66 1.2 1.62v3.77h2.36z"
 )
-ICON_MAIL = ""  # rendered via icon_envelope()
+# Link chip layout (viewBox user units; README renders chips at height=24 CSS px).
+LINK_ROW_H = 24
+LINK_FONT_SIZE = 13.5
+LINK_LABEL_BASELINE = 18.0
+LINK_ICON_SLOT_W = 20
+LINK_ICON_GAP = 7
+LINK_ICON_INK_H = 11.0
+
+
+def link_label_xheight_center_y() -> float:
+    """Vertical center of label x-height (SVG baseline at LINK_LABEL_BASELINE)."""
+    f = font(LINK_FONT_SIZE, 450)
+    bbox = f.getbbox("x", anchor="ls")
+    return LINK_LABEL_BASELINE + (bbox[1] + bbox[3]) / 2.0
+
+
+def place_icon_ink_box(
+    x: float,
+    view_w: float,
+    view_h: float,
+    inner: str,
+    *,
+    origin_x: float = 0,
+    origin_y: float = 0,
+    ink_h: float = LINK_ICON_INK_H,
+    cy: float | None = None,
+    slot_w: float = LINK_ICON_SLOT_W,
+) -> str:
+    """Scale icon art to a uniform ink height and center in the link icon slot."""
+    cy = link_label_xheight_center_y() if cy is None else cy
+    s = ink_h / view_h
+    scaled_w = view_w * s
+    tx = x + slot_w - scaled_w
+    ty = cy - ink_h / 2
+    return (
+        f'<g transform="translate({tx:.4f},{ty:.4f}) scale({s:.6f}) '
+        f'translate({-origin_x:.4f},{-origin_y:.4f})">{inner}</g>'
+    )
+
+
+def icon_envelope_legacy(x: float, y: float, size: float = 16, fill: str = LINK) -> str:
+    """Envelope for combo canvas link row (not README chips)."""
+    pad = 1.25
+    inner = size - 2 * pad
+    s = inner / 24.0
+    return (
+        f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
+        f'<path fill="{fill}" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79'
+        f" 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75"
+        f' 1.75-1.75z"/>'
+        f'<path fill="{PAGE}" d="M5.25 9.75 12 14.5 18.75 9.75z"/>'
+        f'<path fill="none" stroke="{fill}" stroke-width="1.35" stroke-linejoin="round" '
+        f'd="M5.25 9.75 12 14.5 18.75 9.75"/>'
+        f"</g>"
+    )
+
+
+def link_icon_markup(kind: str, x: float = 0) -> str:
+    if kind == "linkedin":
+        return place_icon_ink_box(
+            x, 16, 16, f'<path fill="{LINK}" d="{ICON_LINKEDIN}"/>'
+        )
+    if kind == "email":
+        inner = (
+            f'<path fill="{LINK}" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79'
+            f" 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75"
+            f' 1.75-1.75z"/>'
+            f'<path fill="{PAGE}" d="M5.25 9.75 12 14.5 18.75 9.75z"/>'
+            f'<path fill="none" stroke="{LINK}" stroke-width="1.35" stroke-linejoin="round" '
+            f'd="M5.25 9.75 12 14.5 18.75 9.75"/>'
+        )
+        return place_icon_ink_box(x, 13.5, 11.5, inner, origin_x=5.25, origin_y=8.25)
+    if kind == "medium":
+        inner = (
+            f'<circle cx="500" cy="500" r="500" fill="{LINK}"/>'
+            f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{LINK}"/>'
+            f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{LINK}"/>'
+        )
+        return place_icon_ink_box(x, 1770, 1000, inner)
+    raise ValueError(f"unknown link icon kind: {kind}")
 
 
 def icon(
@@ -208,40 +287,6 @@ def icon(
     return (
         f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
         f'<path fill="{fill}" d="{d}"/></g>'
-    )
-
-
-def icon_envelope(x: float, y: float, size: float = 16, fill: str = LINK) -> str:
-    """Envelope with flap; 24×24 art inset so edges are not clipped."""
-    pad = 1.25
-    inner = size - 2 * pad
-    s = inner / 24.0
-    return (
-        f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
-        f'<path fill="{fill}" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79'
-        f" 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75"
-        f' 1.75-1.75z"/>'
-        f'<path fill="{PAGE}" d="M5.25 9.75 12 14.5 18.75 9.75z"/>'
-        f'<path fill="none" stroke="{fill}" stroke-width="1.35" stroke-linejoin="round" '
-        f'd="M5.25 9.75 12 14.5 18.75 9.75"/>'
-        f"</g>"
-    )
-
-
-def icon_medium_ellipsis(x: float, y: float, size: float = 16, fill: str = LINK) -> str:
-    """Medium brand mark: circle + two ellipses (Collins ellipsis symbol)."""
-    pad = 1.0
-    inner = size - 2 * pad
-    s = inner / 1770.0  # fit full mark width inside icon box (no horizontal clip)
-    art_h = 1000.0 * s
-    tx = x + pad
-    ty = y + pad + max(0.0, (inner - art_h) / 2)
-    return (
-        f'<g transform="translate({tx:.4f},{ty:.4f}) scale({s:.6f})">'
-        f'<circle cx="500" cy="500" r="500" fill="{fill}"/>'
-        f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{fill}"/>'
-        f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{fill}"/>'
-        f"</g>"
     )
 
 
@@ -335,7 +380,19 @@ def readme_chrome(inner: str, content_h: float, bottom_extra: float = 0) -> tupl
                  a6,6 0 0 1 6,-6 z" fill="#0d1117"/>
         """,
         line(CARD_X, CARD_Y + HEADER_H, CARD_X + CARD_W, CARD_Y + HEADER_H, CARD_BORDER, 1),
-        icon_medium_ellipsis(CARD_X + 18, CARD_Y + 16, 16, HEADER_MUTED),
+        place_icon_ink_box(
+            CARD_X + 18,
+            1770,
+            1000,
+            (
+                f'<circle cx="500" cy="500" r="500" fill="{HEADER_MUTED}"/>'
+                f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{HEADER_MUTED}"/>'
+                f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{HEADER_MUTED}"/>'
+            ),
+            slot_w=16,
+            cy=CARD_Y + 23,
+            ink_h=12,
+        ),
         text(CARD_X + 40, CARD_Y + 31, "README.md", 13, HEADER_FG, 500, family="JB"),
         # inner content translated
         f'<g transform="translate(0,{CARD_Y + HEADER_H + top_pad})">',
@@ -355,7 +412,7 @@ def link_row(cx: float, y: float) -> tuple[str, float]:
     items = [
         (ICON_GITHUB, "GitHub"),
         (ICON_LINKEDIN, "LinkedIn"),
-        (ICON_MAIL, EMAIL),
+        ("", EMAIL),
     ]
     widths = []
     for _, label in items:
@@ -364,7 +421,10 @@ def link_row(cx: float, y: float) -> tuple[str, float]:
     x = cx - total / 2
     bits = []
     for i, ((d, label), w) in enumerate(zip(items, widths)):
-        bits.append(icon(d, x, y - 11, icon_s, LINK))
+        if label == EMAIL:
+            bits.append(icon_envelope_legacy(x, y - 11, icon_s, LINK))
+        else:
+            bits.append(icon(d, x, y - 11, icon_s, LINK))
         bits.append(text(x + icon_s + gap_icon, y, label, size, LINK, 450, family="JB"))
         x += w
         if i < len(items) - 1:
@@ -884,30 +944,24 @@ def build_profile_main_svg() -> tuple[str, int]:
     return svg, h
 
 
-def build_link_item_svg(
-    icon_d: str,
-    label: str,
-    *,
-    icon_markup: str | None = None,
-) -> tuple[str, int, int]:
-    size = 13.5
-    gap_icon = 7
-    icon_s = 15
-    text_w = tw(label, size, 450)
-    w = int(icon_s + gap_icon + text_w + 1)
-    h = 24
-    y_text = 18.0
-    if icon_markup is None:
-        if label == EMAIL:
-            icon_markup = icon_envelope(0, y_text - 11, icon_s, LINK)
-        else:
-            icon_markup = icon(icon_d, 0, y_text - 11, icon_s, LINK)
+def build_link_item_svg(label: str, *, kind: str) -> tuple[str, int, int]:
+    text_w = tw(label, LINK_FONT_SIZE, 450)
+    w = int(LINK_ICON_SLOT_W + LINK_ICON_GAP + text_w + 1)
+    h = LINK_ROW_H
     svg = "\n".join(
         [
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">',
             defs(),
-            icon_markup,
-            text(icon_s + gap_icon, y_text, label, size, LINK, 450, family="JB"),
+            link_icon_markup(kind, 0),
+            text(
+                LINK_ICON_SLOT_W + LINK_ICON_GAP,
+                LINK_LABEL_BASELINE,
+                label,
+                LINK_FONT_SIZE,
+                LINK,
+                450,
+                family="JB",
+            ),
             "</svg>",
         ]
     )
@@ -961,17 +1015,12 @@ def build_profile_assets(out_dir: Path | None = None) -> None:
     (out_dir / "profile-main.svg").write_text(main_svg, encoding="utf-8")
 
     link_items = (
-        ("link-linkedin.svg", ICON_LINKEDIN, LINKEDIN_LABEL, None),
-        ("link-email.svg", ICON_MAIL, EMAIL, None),
-        (
-            "link-medium.svg",
-            "",
-            MEDIUM_LABEL,
-            icon_medium_ellipsis(0, 7.0, 15, LINK),
-        ),
+        ("link-linkedin.svg", "linkedin", LINKEDIN_LABEL),
+        ("link-email.svg", "email", EMAIL),
+        ("link-medium.svg", "medium", MEDIUM_LABEL),
     )
-    for name, icon_d, label, icon_markup in link_items:
-        svg, _, _ = build_link_item_svg(icon_d, label, icon_markup=icon_markup)
+    for name, kind, label in link_items:
+        svg, _, _ = build_link_item_svg(label, kind=kind)
         (out_dir / name).write_text(svg, encoding="utf-8")
 
     sep, _, _ = build_link_sep_svg()
@@ -1086,6 +1135,131 @@ def _name_centroid_x(im_path: Path, band_px: int = 100) -> float | None:
         return None
     cols = np.where(mask.any(axis=0))[0]
     return float(cols[0] + cols[-1]) / 2.0
+
+
+def _link_chip_ink_metrics(
+    png_path: Path,
+    *,
+    scale: int = 4,
+    icon_slot_css: float = LINK_ICON_SLOT_W,
+    gap_start_css: float = LINK_ICON_SLOT_W + LINK_ICON_GAP,
+) -> dict[str, float]:
+    """Ink bounding boxes for icon slot and label (CSS px)."""
+    import numpy as np
+    from PIL import Image
+
+    arr = np.array(Image.open(png_path).convert("RGB"))
+    # Link chip ink #58a6ff (icons + labels); ignore near-background screenshot fringe.
+    ink = (
+        (arr[:, :, 2] > 200)
+        & (arr[:, :, 1] > 120)
+        & (arr[:, :, 0] < 120)
+    )
+    slot_max_x = int(round(icon_slot_css * scale))
+    gap_min_x = int(round(gap_start_css * scale))
+    h_px, w_px = ink.shape
+    col = np.arange(w_px)
+    icon_mask = ink & (col < slot_max_x)
+    label_mask = ink & (col >= gap_min_x)
+    if not icon_mask.any() or not label_mask.any():
+        raise RuntimeError(f"no ink in {png_path}")
+
+    icon_ys, icon_xs = np.where(icon_mask)
+    label_ys, label_xs = np.where(label_mask)
+    icon_top = float(icon_ys.min()) / scale
+    icon_bot = float(icon_ys.max()) / scale
+    icon_h = icon_bot - icon_top
+    icon_cy = (icon_top + icon_bot) / 2.0
+    icon_right = float(icon_xs.max()) / scale
+
+    label_top = float(label_ys.min()) / scale
+    label_bot = float(label_ys.max()) / scale
+    label_cy = (label_top + label_bot) / 2.0
+    label_left = float(label_xs.min()) / scale
+    gap = label_left - icon_right
+
+    return {
+        "icon_h": icon_h,
+        "icon_cy": icon_cy,
+        "label_cy": label_cy,
+        "gap": gap,
+    }
+
+
+def verify_link_icon_uniformity(repo_root: Path, *, scale: int = 4) -> None:
+    """Chrome 4× renders + ink bbox assertions (≤1 CSS px tolerance)."""
+    import os
+    import subprocess
+
+    artifact_dir = Path("/opt/cursor/artifacts")
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    script = repo_root / "scripts" / "verify-link-icons.mjs"
+    npm = repo_root / "node_modules" / "puppeteer-core"
+    if not npm.exists():
+        subprocess.run(
+            ["npm", "install", "puppeteer-core@24", "--no-save"],
+            cwd=repo_root,
+            check=True,
+            timeout=120,
+        )
+    env = {**os.environ, "ARTIFACT_DIR": str(artifact_dir)}
+    r = subprocess.run(
+        ["node", str(script)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"link icon capture failed:\n{r.stdout}\n{r.stderr}")
+    print(r.stdout.strip())
+
+    names = ["linkedin", "email", "medium"]
+    metrics: dict[str, dict[str, float]] = {}
+    for name in names:
+        p = artifact_dir / f"link-icon-{name}-{scale}x.png"
+        metrics[name] = _link_chip_ink_metrics(p, scale=scale)
+
+    tol = 1.0
+    label_x_cy = link_label_xheight_center_y()
+    heights = [m["icon_h"] for m in metrics.values()]
+    cy_icons = [m["icon_cy"] for m in metrics.values()]
+    gaps = [m["gap"] for m in metrics.values()]
+
+    print("\nlink icon uniformity (CSS px):")
+    print(
+        f"{'chip':<10} {'icon_h':>8} {'icon_cy':>9} {'xheight_cy':>10} {'gap':>8}"
+    )
+    print(f"{'(target)':<10} {'':>8} {'':>9} {label_x_cy:10.2f}")
+    for name in names:
+        m = metrics[name]
+        print(
+            f"{name:<10} {m['icon_h']:8.2f} {m['icon_cy']:9.2f} "
+            f"{m['label_cy']:9.2f} {m['gap']:8.2f}"
+        )
+
+    h_spread = max(heights) - min(heights)
+    if h_spread > tol:
+        raise RuntimeError(
+            f"icon heights spread {h_spread:.2f}px > {tol}px: {heights}"
+        )
+    ref_cy = sum(cy_icons) / len(cy_icons)
+    for name, cy in zip(names, cy_icons, strict=True):
+        if abs(cy - ref_cy) > tol:
+            raise RuntimeError(
+                f"{name} icon center {cy:.2f} vs mean {ref_cy:.2f} (>{tol}px)"
+            )
+    for name, cy in zip(names, cy_icons, strict=True):
+        if abs(cy - label_x_cy) > tol:
+            raise RuntimeError(
+                f"{name} icon center {cy:.2f} vs x-height center {label_x_cy:.2f}"
+            )
+    gap_spread = max(gaps) - min(gaps)
+    if gap_spread > tol:
+        raise RuntimeError(f"icon-label gaps spread {gap_spread:.2f}px > {tol}px")
+
+    print(f"OK: height spread {h_spread:.2f}px, gap spread {gap_spread:.2f}px")
 
 
 def save_link_row_zoom(readme_png: Path, dest: Path, zoom: int = 3) -> None:
@@ -1370,7 +1544,8 @@ def main():
         artifact = Path("/opt/cursor/artifacts/readme-profile-verify.png")
         artifact.parent.mkdir(parents=True, exist_ok=True)
         render_readme_settled_puppeteer(repo, artifact)
-        save_link_row_zoom(artifact, artifact.parent / "readme-link-row-3x.png", 3)
+        save_link_row_zoom(artifact, artifact.parent / "readme-link-row-4x.png", 4)
+        verify_link_icon_uniformity(repo)
         verify_profile_name_animation(repo)
         ref = Path(
             "/home/ubuntu/.cursor/projects/agent-repos-UdaykiranReddy-1/assets/04-combo.png"
