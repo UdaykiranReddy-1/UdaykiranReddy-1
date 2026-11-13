@@ -737,40 +737,30 @@ def name_unscramble_svg(cx: float, y: float) -> str:
     bits.append(
         '<g id="profile-name-scrambles" '
         'requiredFeatures="http://www.w3.org/TR/SVG11/feature#Animation">'
+        f'<set attributeName="display" to="none" begin="{ms(end_ms)}" fill="freeze"/>'
+        f'<set attributeName="visibility" to="hidden" begin="{ms(end_ms)}" fill="freeze"/>'
+        f'<set attributeName="opacity" to="0" begin="{ms(end_ms)}" fill="freeze"/>'
     )
-    bits.append(
-        f'<text id="profile-name-scramble" x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" {name_attrs} '
-        f'display="none" visibility="hidden" opacity="0">'
-    )
-    for attr, on, off in (
-        ("display", "inline", "none"),
-        ("visibility", "visible", "hidden"),
-        ("opacity", "1", "0"),
-    ):
-        bits.append(
-            f'<set attributeName="{attr}" to="{on}" begin="{ms(start_ms)}" fill="freeze"/>'
-        )
-        bits.append(
-            f'<set attributeName="{attr}" to="{off}" begin="{ms(end_ms)}" fill="freeze"/>'
-        )
-    bits.append(
-        f'<set attributeName="x" to="-10000" begin="{ms(end_ms)}" fill="freeze"/>'
-    )
+    # One absolute <text> per frame (text-anchor=middle on each); never use flowing tspans.
     for i, label in enumerate(overlays):
         t0 = start_ms + i * step_ms
         t1 = t0 + step_ms
         bits.append(
-            f'<tspan id="profile-name-frame-{i}" display="none" visibility="hidden">'
+            f'<text id="profile-name-frame-{i}" x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" '
+            f"{name_attrs} display=\"none\" visibility=\"hidden\" opacity=\"0\">"
             f"{esc(label)}"
             f'<set attributeName="display" to="inline" begin="{ms(t0)}" fill="freeze"/>'
             f'<set attributeName="visibility" to="visible" begin="{ms(t0)}" fill="freeze"/>'
+            f'<set attributeName="opacity" to="1" begin="{ms(t0)}" fill="freeze"/>'
             f'<set attributeName="display" to="none" begin="{ms(t1)}" fill="freeze"/>'
             f'<set attributeName="visibility" to="hidden" begin="{ms(t1)}" fill="freeze"/>'
+            f'<set attributeName="opacity" to="0" begin="{ms(t1)}" fill="freeze"/>'
             f'<set attributeName="display" to="none" begin="{ms(end_ms)}" fill="freeze"/>'
             f'<set attributeName="visibility" to="hidden" begin="{ms(end_ms)}" fill="freeze"/>'
-            f"</tspan>"
+            f'<set attributeName="opacity" to="0" begin="{ms(end_ms)}" fill="freeze"/>'
+            f"</text>"
         )
-    bits.append("</text></g></g>")
+    bits.append("</g></g>")
     return "\n".join(bits)
 
 
@@ -1036,10 +1026,26 @@ def _inline_svg_html(body: str, page_w: int) -> str:
 <body>{body}</body></html>"""
 
 
-def verify_profile_name_animation(repo_root: Path) -> None:
-    """SMIL mid-frames (Chrome + object); settled still frame via Cairo (GitHub <img>)."""
-    from PIL import Image, ImageChops
+def _name_centroid_x(im_path: Path, band_px: int = 100) -> float | None:
+    """Horizontal center of the name ink (bounding box of bright top band pixels)."""
     import numpy as np
+    from PIL import Image
+
+    gray = np.array(Image.open(im_path).convert("L"))
+    band = gray[: min(band_px, gray.shape[0]), :]
+    mask = band > 210
+    if not mask.any():
+        return None
+    cols = np.where(mask.any(axis=0))[0]
+    return float(cols[0] + cols[-1]) / 2.0
+
+
+def verify_profile_name_animation(repo_root: Path) -> None:
+    """SMIL via <img> in real Chrome (puppeteer-core) + real-time waits."""
+    import os
+    import shutil
+    import subprocess
+    from PIL import Image
 
     artifact_dir = Path("/opt/cursor/artifacts")
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -1047,52 +1053,63 @@ def verify_profile_name_animation(repo_root: Path) -> None:
     if not svg_path.exists():
         build_profile_assets(repo_root / "assets")
 
-    _svg, h = build_profile_main_svg()
-    w = CONTENT_W
-    scale = 2
-    page_h = h - PROFILE_VIEWBOX_TOP
+    script = repo_root / "scripts" / "verify-profile-smil-img.mjs"
+    if not script.exists():
+        raise RuntimeError(f"missing {script}")
 
-    settled_img = artifact_dir / "profile-name-settled.png"
-    render_profile_main_static_png(svg_path, settled_img, h, scale)
-
-    def shot_inline(budget_ms: int, dest: Path) -> None:
-        import base64
-
-        html_path = repo_root / f"_name_anim_{budget_ms}.html"
-        obj_h = h - PROFILE_VIEWBOX_TOP + 8
-        svg_b64 = base64.b64encode(svg_path.read_bytes()).decode("ascii")
-        svg_uri = f"data:image/svg+xml;base64,{svg_b64}"
-        html_path.write_text(
-            f"""<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<style>html,body{{margin:0;padding:0;background:{PAGE};width:{w}px}}</style>
-</head>
-<body>
-<object data="{svg_uri}" type="image/svg+xml"
- width="{w}" height="{obj_h}"></object>
-</body></html>""",
-            encoding="utf-8",
+    npm = repo_root / "node_modules" / "puppeteer-core"
+    if not npm.exists():
+        subprocess.run(
+            ["npm", "install", "puppeteer-core@24", "--no-save"],
+            cwd=repo_root,
+            check=True,
+            timeout=120,
         )
-        _chrome_screenshot_html(html_path, dest, w, page_h, scale, budget_ms)
-        html_path.unlink(missing_ok=True)
 
-    # Mid scramble windows (symbol frame ~60ms, partial decode ~350ms).
-    for budget_ms, out_name in (
-        (60, "profile-name-mid-scramble-70ms.png"),
-        (350, "profile-name-mid-scramble-350ms.png"),
-    ):
-        shot_inline(budget_ms, artifact_dir / out_name)
-
-    settled_smil = artifact_dir / "profile-name-settled-smil.png"
-    shot_inline(name_unscramble_end_ms() + 800, settled_smil)
-
-    diff = ImageChops.difference(
-        Image.open(settled_img).convert("RGB"),
-        Image.open(settled_smil).convert("RGB"),
+    env = {**os.environ, "ARTIFACT_DIR": str(artifact_dir)}
+    r = subprocess.run(
+        ["node", str(script)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=180,
     )
-    mean = float(np.array(diff).mean())
-    print(f"name settled img vs SMIL end diff mean: {mean:.4f}")
+    if r.returncode != 0:
+        raise RuntimeError(f"puppeteer verify failed:\n{r.stdout}\n{r.stderr}")
+    print(r.stdout.strip())
+
+    delays = [100, 250, 400, 600, 900, 3000]
+    centroids: dict[int, float] = {}
+    for ms in delays:
+        p = artifact_dir / f"profile-name-img-{ms}ms.png"
+        cx = _name_centroid_x(p)
+        if cx is not None:
+            centroids[ms] = cx
+            print(f"name centroid @ {ms}ms: x={cx:.1f}px (img width {Image.open(p).size[0]})")
+
+    if len(centroids) >= 2:
+        ref = centroids.get(3000) or centroids.get(900)
+        if ref is not None:
+            for ms, cx in centroids.items():
+                drift = abs(cx - ref)
+                print(f"  drift vs settled @ {ms}ms: {drift:.1f}px")
+                if drift > 20:
+                    raise RuntimeError(
+                        f"name off-center at {ms}ms (centroid {cx:.0f}, settled {ref:.0f})"
+                    )
+
+    settled = artifact_dir / "profile-name-img-3000ms.png"
+    legacy70 = artifact_dir / "profile-name-mid-scramble-70ms.png"
+    legacy350 = artifact_dir / "profile-name-mid-scramble-350ms.png"
+    img100 = artifact_dir / "profile-name-img-100ms.png"
+    img400 = artifact_dir / "profile-name-img-400ms.png"
+    if settled.exists():
+        shutil.copy2(settled, artifact_dir / "profile-name-settled.png")
+    if img100.exists():
+        shutil.copy2(img100, legacy70)
+    if img400.exists():
+        shutil.copy2(img400, legacy350)
 
 
 def render_readme_preview(
