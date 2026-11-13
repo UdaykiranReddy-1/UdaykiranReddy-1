@@ -197,6 +197,9 @@ LINK_LABEL_BASELINE = 18.0
 LINK_ICON_SLOT_W = 20
 LINK_ICON_GAP = 7
 LINK_ICON_INK_H = 11.0
+# Square LinkedIn mark reads smaller than wide envelope/Medium at equal ink height.
+LINK_LINKEDIN_OPTICAL_INK_H = 13.75
+LINK_MEDIUM_INK_H = 10.45
 
 
 def link_label_xheight_center_y() -> float:
@@ -250,7 +253,11 @@ def icon_envelope_legacy(x: float, y: float, size: float = 16, fill: str = LINK)
 def link_icon_markup(kind: str, x: float = 0) -> str:
     if kind == "linkedin":
         return place_icon_ink_box(
-            x, 16, 16, f'<path fill="{LINK}" d="{ICON_LINKEDIN}"/>'
+            x,
+            16,
+            16,
+            f'<path fill="{LINK}" d="{ICON_LINKEDIN}"/>',
+            ink_h=LINK_LINKEDIN_OPTICAL_INK_H,
         )
     if kind == "email":
         inner = (
@@ -268,7 +275,7 @@ def link_icon_markup(kind: str, x: float = 0) -> str:
             f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{LINK}"/>'
             f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{LINK}"/>'
         )
-        return place_icon_ink_box(x, 1770, 1000, inner)
+        return place_icon_ink_box(x, 1770, 1000, inner, ink_h=LINK_MEDIUM_INK_H)
     raise ValueError(f"unknown link icon kind: {kind}")
 
 
@@ -1168,9 +1175,12 @@ def _link_chip_ink_metrics(
     label_ys, label_xs = np.where(label_mask)
     icon_top = float(icon_ys.min()) / scale
     icon_bot = float(icon_ys.max()) / scale
+    icon_left = float(icon_xs.min()) / scale
     icon_h = icon_bot - icon_top
+    icon_w = float(icon_xs.max()) / scale - icon_left
     icon_cy = (icon_top + icon_bot) / 2.0
     icon_right = float(icon_xs.max()) / scale
+    ink_area = float(icon_mask.sum()) / (scale * scale)
 
     label_top = float(label_ys.min()) / scale
     label_bot = float(label_ys.max()) / scale
@@ -1180,6 +1190,8 @@ def _link_chip_ink_metrics(
 
     return {
         "icon_h": icon_h,
+        "icon_w": icon_w,
+        "ink_area": ink_area,
         "icon_cy": icon_cy,
         "label_cy": label_cy,
         "gap": gap,
@@ -1222,27 +1234,30 @@ def verify_link_icon_uniformity(repo_root: Path, *, scale: int = 4) -> None:
         metrics[name] = _link_chip_ink_metrics(p, scale=scale)
 
     tol = 1.0
+    area_tol = 0.10
     label_x_cy = link_label_xheight_center_y()
-    heights = [m["icon_h"] for m in metrics.values()]
+    areas = [m["ink_area"] for m in metrics.values()]
     cy_icons = [m["icon_cy"] for m in metrics.values()]
     gaps = [m["gap"] for m in metrics.values()]
 
     print("\nlink icon uniformity (CSS px):")
     print(
-        f"{'chip':<10} {'icon_h':>8} {'icon_cy':>9} {'xheight_cy':>10} {'gap':>8}"
+        f"{'chip':<10} {'icon_h':>7} {'icon_w':>7} {'ink_area':>9} "
+        f"{'icon_cy':>8} {'gap':>7}"
     )
-    print(f"{'(target)':<10} {'':>8} {'':>9} {label_x_cy:10.2f}")
+    print(f"{'(x-height)':<10} {'':>7} {'':>7} {'':>9} {label_x_cy:8.2f}")
     for name in names:
         m = metrics[name]
         print(
-            f"{name:<10} {m['icon_h']:8.2f} {m['icon_cy']:9.2f} "
-            f"{m['label_cy']:9.2f} {m['gap']:8.2f}"
+            f"{name:<10} {m['icon_h']:7.2f} {m['icon_w']:7.2f} {m['ink_area']:9.1f} "
+            f"{m['icon_cy']:8.2f} {m['gap']:7.2f}"
         )
 
-    h_spread = max(heights) - min(heights)
-    if h_spread > tol:
+    area_mean = sum(areas) / len(areas)
+    area_spread = (max(areas) - min(areas)) / area_mean if area_mean else 0.0
+    if area_spread > area_tol:
         raise RuntimeError(
-            f"icon heights spread {h_spread:.2f}px > {tol}px: {heights}"
+            f"ink area spread {area_spread * 100:.1f}% > {area_tol * 100:.0f}%: {areas}"
         )
     ref_cy = sum(cy_icons) / len(cy_icons)
     for name, cy in zip(names, cy_icons, strict=True):
@@ -1259,7 +1274,9 @@ def verify_link_icon_uniformity(repo_root: Path, *, scale: int = 4) -> None:
     if gap_spread > tol:
         raise RuntimeError(f"icon-label gaps spread {gap_spread:.2f}px > {tol}px")
 
-    print(f"OK: height spread {h_spread:.2f}px, gap spread {gap_spread:.2f}px")
+    print(
+        f"OK: ink area spread {area_spread * 100:.1f}%, gap spread {gap_spread:.2f}px"
+    )
 
 
 def save_link_row_zoom(readme_png: Path, dest: Path, zoom: int = 3) -> None:
