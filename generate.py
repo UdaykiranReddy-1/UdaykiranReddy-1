@@ -1,0 +1,1594 @@
+#!/usr/bin/env python3
+"""Generate four GitHub profile README concept previews (SVG + PNG)."""
+
+from __future__ import annotations
+
+import base64
+import html as htmlmod
+import math
+import subprocess
+import tempfile
+from pathlib import Path
+
+from PIL import ImageFont
+
+OUT = Path(__file__).resolve().parent / "assets"
+FONT_DIR = OUT / "fonts"
+JB_PATH = FONT_DIR / "JetBrainsMono-Variable.ttf"
+JB_ITALIC_PATH = FONT_DIR / "JetBrainsMono-Italic-Variable.ttf"
+# Fallback when variable fonts are absent (local preview generation only).
+JB_FALLBACK_DIR = Path("/usr/share/fonts/truetype/jetbrains-mono")
+JB_MEDIUM_PATH = JB_FALLBACK_DIR / "JetBrainsMono-Medium.ttf"
+JB_SEMIBOLD_PATH = JB_FALLBACK_DIR / "JetBrainsMono-SemiBold.ttf"
+
+# --- palette (GitHub dark + restrained accents) ---
+PAGE = "#0d1117"
+CARD_BORDER = "#30363d"
+HEADER_FG = "#e6edf3"
+HEADER_MUTED = "#7d8590"
+TEXT = "#e6edf3"
+MUTED = "#8b949e"
+DIM = "#6e7681"
+FAINT = "#484f58"
+LINK = "#58a6ff"
+GREEN = "#3fb950"
+GREEN_SOFT = "#7ee787"
+YELLOW = "#e3b341"
+ORANGE = "#ffa657"
+CYAN = "#79c0ff"
+NAME = "#f0f6fc"
+TERM_BG = "#010409"
+TERM_BAR = "#161b22"
+TERM_BORDER = "#30363d"
+PILL_BG = "#161b22"
+PILL_BORDER = "#30363d"
+RED_DOT = "#ff5f56"
+YEL_DOT = "#ffbd2e"
+GRN_DOT = "#27c93f"
+
+W = 1200
+CARD_X = 40
+CARD_Y = 40
+CARD_W = 1120
+HEADER_H = 48
+PAD_X = 64
+CONTENT_W = CARD_W - PAD_X * 2  # 992
+CONTENT_X = CARD_X + PAD_X
+
+# Real content
+FULL_NAME = "Uday Kiran Reddy"
+TAGLINE = "I code and decode stuff"
+LOCATION = "Bangalore, India"
+ROLE = "Any-Stack Developer"
+STACK = ["Web Stack", "DB Stack", "Mobile Stack", "AI Stack"]
+NOW = "Side projects"
+LEARNING = "Advanced System Design & Cloud"
+GITHUB = "UdaykiranReddy-1"
+EMAIL = "uday410ry@gmail.com"
+LINKEDIN_LABEL = "LinkedIn"
+MEDIUM_LABEL = "Medium"
+
+
+def b64(path: Path) -> str:
+    return base64.b64encode(path.read_bytes()).decode()
+
+
+def font(size: float, weight: int = 400, italic: bool = False) -> ImageFont.FreeTypeFont:
+    if italic and JB_ITALIC_PATH.exists():
+        path = JB_ITALIC_PATH
+    elif JB_PATH.exists():
+        path = JB_PATH
+    elif italic:
+        path = JB_FALLBACK_DIR / "JetBrainsMono-Italic.ttf"
+    elif weight >= 600:
+        path = JB_SEMIBOLD_PATH
+    elif weight >= 500:
+        path = JB_MEDIUM_PATH
+    else:
+        path = JB_FALLBACK_DIR / "JetBrainsMono-Regular.ttf"
+    f = ImageFont.truetype(str(path), size)
+    if path == JB_PATH or path == JB_ITALIC_PATH:
+        try:
+            f.set_variation_by_axes([weight])
+        except Exception:
+            pass
+    return f
+
+
+def tw(text: str, size: float, weight: int = 400, italic: bool = False) -> float:
+    return float(font(size, weight, italic).getlength(text))
+
+
+
+
+def esc(s: str) -> str:
+    return htmlmod.escape(s, quote=True)
+
+
+def tspan_safe(s: str) -> str:
+    return esc(s)
+
+
+def text(
+    x,
+    y,
+    s,
+    size,
+    fill=TEXT,
+    weight=400,
+    family="JB",
+    anchor="start",
+    italic=False,
+    letter_spacing=None,
+    opacity=None,
+):
+    attrs = [
+        f'x="{x:.2f}"',
+        f'y="{y:.2f}"',
+        f'fill="{fill}"',
+        f'font-family="{family}"',
+        f'font-size="{size}"',
+        f'font-weight="{weight}"',
+        f'text-anchor="{anchor}"',
+    ]
+    if italic:
+        attrs.append('font-style="italic"')
+    if letter_spacing is not None:
+        attrs.append(f'letter-spacing="{letter_spacing}"')
+    if opacity is not None:
+        attrs.append(f'opacity="{opacity}"')
+    attrs.append('xml:space="preserve"')
+    return f"<text {' '.join(attrs)}>{esc(s)}</text>"
+
+
+def rect(x, y, w, h, fill="none", rx=0, stroke=None, sw=1, opacity=None, extra=""):
+    attrs = [
+        f'x="{x:.2f}"',
+        f'y="{y:.2f}"',
+        f'width="{w:.2f}"',
+        f'height="{h:.2f}"',
+        f'rx="{rx}"',
+        f'fill="{fill}"',
+    ]
+    if stroke:
+        attrs.append(f'stroke="{stroke}"')
+        attrs.append(f'stroke-width="{sw}"')
+    if opacity is not None:
+        attrs.append(f'opacity="{opacity}"')
+    if extra:
+        attrs.append(extra)
+    return f"<rect {' '.join(attrs)} />"
+
+
+def circle(cx, cy, r, fill):
+    return f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r}" fill="{fill}" />'
+
+
+def line(x1, y1, x2, y2, stroke, sw=1, opacity=None):
+    o = f' opacity="{opacity}"' if opacity is not None else ""
+    return (
+        f'<line x1="{x1:.2f}" y1="{y1:.2f}" x2="{x2:.2f}" y2="{y2:.2f}" '
+        f'stroke="{stroke}" stroke-width="{sw}" stroke-linecap="round"{o} />'
+    )
+
+
+# Simple monochrome icons (16x16 viewBox), official-ish marks
+ICON_GITHUB = (
+    "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38"
+    " 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13"
+    "-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66"
+    ".07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15"
+    "-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0"
+    " 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56"
+    ".82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07"
+    "-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+)
+ICON_LINKEDIN = (
+    "M2 0h12a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V2a2 2 0 012-2zm2.5"
+    " 13.5V6.2H2.2v7.3h2.3zM3.35 5.2c.8 0 1.3-.53 1.3-1.2-.02-.68-.5-1.2-1.28"
+    "-1.2S2.07 3.32 2.07 4c0 .67.5 1.2 1.26 1.2h.02zM13.8 13.5V9.4c0-2.2-1.17"
+    "-3.22-2.73-3.22-1.26 0-1.82.7-2.14 1.18V6.2H6.64c.03.66 0 7.3 0 7.3h2.3V9.54"
+    "c0-.21.02-.42.08-.57.17-.42.56-.86 1.22-.86.86 0 1.2.66 1.2 1.62v3.77h2.36z"
+)
+# Link chip layout (viewBox user units; README renders chips at height=24 CSS px).
+LINK_ROW_H = 24
+LINK_FONT_SIZE = 13.5
+LINK_LABEL_BASELINE = 18.0
+LINK_ICON_SLOT_W = 20
+LINK_ICON_GAP = 7
+LINK_ICON_INK_H = 11.0
+# Square LinkedIn mark reads smaller than wide envelope/Medium at equal ink height.
+LINK_LINKEDIN_OPTICAL_INK_H = 13.75
+LINK_MEDIUM_INK_H = 10.45
+
+
+def link_label_xheight_center_y() -> float:
+    """Vertical center of label x-height (SVG baseline at LINK_LABEL_BASELINE)."""
+    f = font(LINK_FONT_SIZE, 450)
+    bbox = f.getbbox("x", anchor="ls")
+    return LINK_LABEL_BASELINE + (bbox[1] + bbox[3]) / 2.0
+
+
+def place_icon_ink_box(
+    x: float,
+    view_w: float,
+    view_h: float,
+    inner: str,
+    *,
+    origin_x: float = 0,
+    origin_y: float = 0,
+    ink_h: float = LINK_ICON_INK_H,
+    cy: float | None = None,
+    slot_w: float = LINK_ICON_SLOT_W,
+) -> str:
+    """Scale icon art to a uniform ink height and center in the link icon slot."""
+    cy = link_label_xheight_center_y() if cy is None else cy
+    s = ink_h / view_h
+    scaled_w = view_w * s
+    tx = x + slot_w - scaled_w
+    ty = cy - ink_h / 2
+    return (
+        f'<g transform="translate({tx:.4f},{ty:.4f}) scale({s:.6f}) '
+        f'translate({-origin_x:.4f},{-origin_y:.4f})">{inner}</g>'
+    )
+
+
+def icon_envelope_legacy(x: float, y: float, size: float = 16, fill: str = LINK) -> str:
+    """Envelope for combo canvas link row (not README chips)."""
+    pad = 1.25
+    inner = size - 2 * pad
+    s = inner / 24.0
+    return (
+        f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
+        f'<path fill="{fill}" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79'
+        f" 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75"
+        f' 1.75-1.75z"/>'
+        f'<path fill="{PAGE}" d="M5.25 9.75 12 14.5 18.75 9.75z"/>'
+        f'<path fill="none" stroke="{fill}" stroke-width="1.35" stroke-linejoin="round" '
+        f'd="M5.25 9.75 12 14.5 18.75 9.75"/>'
+        f"</g>"
+    )
+
+
+def link_icon_markup(kind: str, x: float = 0) -> str:
+    if kind == "linkedin":
+        return place_icon_ink_box(
+            x,
+            16,
+            16,
+            f'<path fill="{LINK}" d="{ICON_LINKEDIN}"/>',
+            ink_h=LINK_LINKEDIN_OPTICAL_INK_H,
+        )
+    if kind == "email":
+        inner = (
+            f'<path fill="{LINK}" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79'
+            f" 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75"
+            f' 1.75-1.75z"/>'
+            f'<path fill="{PAGE}" d="M5.25 9.75 12 14.5 18.75 9.75z"/>'
+            f'<path fill="none" stroke="{LINK}" stroke-width="1.35" stroke-linejoin="round" '
+            f'd="M5.25 9.75 12 14.5 18.75 9.75"/>'
+        )
+        return place_icon_ink_box(x, 13.5, 11.5, inner, origin_x=5.25, origin_y=8.25)
+    if kind == "medium":
+        inner = (
+            f'<circle cx="500" cy="500" r="500" fill="{LINK}"/>'
+            f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{LINK}"/>'
+            f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{LINK}"/>'
+        )
+        return place_icon_ink_box(x, 1770, 1000, inner, ink_h=LINK_MEDIUM_INK_H)
+    raise ValueError(f"unknown link icon kind: {kind}")
+
+
+def icon(
+    d: str,
+    x: float,
+    y: float,
+    size: float = 16,
+    fill: str = LINK,
+    *,
+    view: float = 16,
+    pad: float = 0,
+) -> str:
+    inner = max(size - 2 * pad, 1)
+    s = inner / view
+    return (
+        f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
+        f'<path fill="{fill}" d="{d}"/></g>'
+    )
+
+
+def font_css() -> str:
+    if JB_PATH.exists() and JB_ITALIC_PATH.exists():
+        jb = b64(JB_PATH)
+        jbi = b64(JB_ITALIC_PATH)
+        return f"""
+@font-face {{
+  font-family: 'JB';
+  src: url('data:font/truetype;base64,{jb}') format('truetype');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: block;
+}}
+@font-face {{
+  font-family: 'JB';
+  src: url('data:font/truetype;base64,{jbi}') format('truetype');
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: block;
+}}
+text {{ font-synthesis: none; }}
+"""
+    faces = []
+    reg = JB_FALLBACK_DIR / "JetBrainsMono-Regular.ttf"
+    ital = JB_FALLBACK_DIR / "JetBrainsMono-Italic.ttf"
+    for weight, path, style in (
+        (400, reg, "normal"),
+        (500, JB_MEDIUM_PATH, "normal"),
+        (600, JB_SEMIBOLD_PATH, "normal"),
+        (400, ital, "italic"),
+    ):
+        data = b64(path)
+        faces.append(
+            f"""@font-face {{
+  font-family: 'JB';
+  src: url('data:font/truetype;base64,{data}') format('truetype');
+  font-weight: {weight};
+  font-style: {style};
+  font-display: block;
+}}"""
+        )
+    return "\n".join(faces) + "\ntext { font-synthesis: none; }"
+
+
+def defs() -> str:
+    return f"""
+<defs>
+  <style type="text/css">{font_css()}</style>
+  <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="120%">
+    <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#010409" flood-opacity="0.55"/>
+  </filter>
+  <filter id="softShadow" x="-8%" y="-8%" width="116%" height="130%">
+    <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
+  </filter>
+</defs>
+"""
+
+
+def readme_chrome(inner: str, content_h: float, bottom_extra: float = 0) -> tuple[str, int]:
+    """Wrap content in a GitHub-dark profile README card. Returns (svg, height)."""
+    # content_h is height of the inner block starting after the file header,
+    # including top and bottom content padding already baked in by the caller
+    # or we add padding here. Callers pass the height of their content only;
+    # we add top/bottom padding.
+    top_pad = 44
+    bot_pad = 40 + bottom_extra
+    card_h = HEADER_H + top_pad + content_h + bot_pad
+    page_h = int(CARD_Y * 2 + card_h)
+    # file header
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{page_h}" viewBox="0 0 {W} {page_h}">',
+        defs(),
+        rect(0, 0, W, page_h, PAGE),
+        # README card
+        rect(
+            CARD_X,
+            CARD_Y,
+            CARD_W,
+            card_h,
+            PAGE,
+            rx=6,
+            stroke=CARD_BORDER,
+            sw=1,
+        ),
+        # header bar fill (clip via a rect under the top of the rounded card)
+        f"""
+        <path d="M{CARD_X+6},{CARD_Y} h{CARD_W-12}
+                 a6,6 0 0 1 6,6 v{HEADER_H-6} h{-CARD_W} v{-HEADER_H+6}
+                 a6,6 0 0 1 6,-6 z" fill="#0d1117"/>
+        """,
+        line(CARD_X, CARD_Y + HEADER_H, CARD_X + CARD_W, CARD_Y + HEADER_H, CARD_BORDER, 1),
+        place_icon_ink_box(
+            CARD_X + 18,
+            1770,
+            1000,
+            (
+                f'<circle cx="500" cy="500" r="500" fill="{HEADER_MUTED}"/>'
+                f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{HEADER_MUTED}"/>'
+                f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{HEADER_MUTED}"/>'
+            ),
+            slot_w=16,
+            cy=CARD_Y + 23,
+            ink_h=12,
+        ),
+        text(CARD_X + 40, CARD_Y + 31, "README.md", 13, HEADER_FG, 500, family="JB"),
+        # inner content translated
+        f'<g transform="translate(0,{CARD_Y + HEADER_H + top_pad})">',
+        inner,
+        "</g>",
+        "</svg>",
+    ]
+    return "\n".join(parts), page_h
+
+
+def link_row(cx: float, y: float) -> tuple[str, float]:
+    """Centered GitHub / LinkedIn / email row. Returns (svg, height)."""
+    size = 13.5
+    gap_icon = 7
+    gap_item = 36
+    icon_s = 15
+    items = [
+        (ICON_GITHUB, "GitHub"),
+        (ICON_LINKEDIN, "LinkedIn"),
+        ("", EMAIL),
+    ]
+    widths = []
+    for _, label in items:
+        widths.append(icon_s + gap_icon + tw(label, size, 450))
+    total = sum(widths) + gap_item * (len(items) - 1)
+    x = cx - total / 2
+    bits = []
+    for i, ((d, label), w) in enumerate(zip(items, widths)):
+        if label == EMAIL:
+            bits.append(icon_envelope_legacy(x, y - 11, icon_s, LINK))
+        else:
+            bits.append(icon(d, x, y - 11, icon_s, LINK))
+        bits.append(text(x + icon_s + gap_icon, y, label, size, LINK, 450, family="JB"))
+        x += w
+        if i < len(items) - 1:
+            # subtle mid dot between items, sitting in the gap
+            dots_x = x + gap_item / 2
+            bits.append(text(dots_x, y, "·", size, FAINT, 400, family="JB", anchor="middle"))
+            x += gap_item
+    return "\n".join(bits), 20
+
+
+def stack_row(cx: float, y: float, size: float = 13, weight: int = 450, fill: str = MUTED) -> str:
+    sep = f"\u00a0\u00a0{MIDDOT}\u00a0\u00a0"
+    label = sep.join(STACK)
+    return text(cx, y, label, size, fill, weight, family="JB", anchor="middle")
+
+
+def decoder_strip(cx: float, y: float, scale: float = 1.0) -> tuple[str, float]:
+    """3-frame scramble → name annotation. Returns (svg, height used)."""
+    frames = [
+        ("U#4y K!r@n R3d*y", DIM, 0.9),
+        ("Ud?y Ki?an Re??y", MUTED, 0.95),
+        ("Uday Kiran Reddy", TEXT, 1.0),
+    ]
+    f_size = 13 * scale
+    f_pad_x = 18 * scale
+    f_h = 36 * scale
+    f_w = tw(frames[0][0], 13, 450) * scale + f_pad_x * 2
+    arrow_w = 28 * scale
+    group_w = f_w * 3 + arrow_w * 2
+    fx = cx - group_w / 2
+    parts = []
+    for i, (label, color, op) in enumerate(frames):
+        parts.append(rect(fx, y, f_w, f_h, PILL_BG, rx=6, stroke=PILL_BORDER, sw=1, opacity=op))
+        parts.append(
+            text(
+                fx + f_w / 2,
+                y + f_h * 0.65,
+                label,
+                f_size,
+                color,
+                450,
+                family="JB",
+                anchor="middle",
+                opacity=op,
+            )
+        )
+        fx += f_w
+        if i < 2:
+            parts.append(
+                text(
+                    fx + arrow_w / 2,
+                    y + f_h * 0.65,
+                    "→",
+                    14 * scale,
+                    FAINT,
+                    400,
+                    family="JB",
+                    anchor="middle",
+                )
+            )
+            fx += arrow_w
+    # frame labels
+    lab_y = y + f_h + 16 * scale
+    labels = ["scrambled", "settling", "final"]
+    fx = cx - group_w / 2
+    for i, lab in enumerate(labels):
+        parts.append(
+            text(
+                fx + f_w / 2,
+                lab_y,
+                lab,
+                10 * scale,
+                FAINT,
+                400,
+                family="JB",
+                anchor="middle",
+                letter_spacing=0.4,
+            )
+        )
+        fx += f_w + (arrow_w if i < 2 else 0)
+    height = (lab_y + 2 * scale) - y
+    return "\n".join(parts), height
+
+
+def cursor_block(x, y, w=8, h=16, fill=GREEN):
+    return rect(x, y, w, h, fill, rx=1)
+
+
+# ---------------------------------------------------------------------------
+# 1. Terminal card
+# ---------------------------------------------------------------------------
+def build_terminal() -> tuple[str, int]:
+    term_w = 860
+    term_x = CONTENT_X + (CONTENT_W - term_w) / 2
+    bar_h = 44
+    body_top = bar_h + 36
+    body = []
+    y = body_top
+    px = term_x + 40
+    body.append(text(px, y, "$", 16, GREEN, 500))
+    body.append(text(px + 22, y, "whoami", 16, TEXT, 400))
+    y += 38
+    body.append(text(px, y, FULL_NAME, 28, NAME, 600))
+    y += 44
+    body.append(text(px, y, TAGLINE, 16, MUTED, 400, italic=True))
+    y += 40
+    body.append(line(px, y, term_x + term_w - 40, y, CARD_BORDER, 1, opacity=0.9))
+    y += 36
+
+    key_size = 13.5
+    val_size = 13.5
+    stack_line = "\u00a0\u00a0·\u00a0\u00a0".join(STACK)
+    rows = [
+        ("location", LOCATION),
+        ("role", ROLE),
+        ("stack", stack_line),
+        ("now", NOW),
+        ("learning", LEARNING),
+    ]
+    key_w = max(tw(k, key_size, 500) for k, _ in rows) + 4
+    val_x = px + key_w + 28
+    for key, val in rows:
+        body.append(text(px, y, key, key_size, DIM, 500))
+        body.append(text(val_x, y, val, val_size, TEXT, 400))
+        y += 30
+    y += 22
+    body.append(text(px, y, "$", 16, GREEN, 500))
+    body.append(cursor_block(px + 22, y - 12, 7, 15, GREEN))
+    y += 36
+    term_h = y
+
+    window = [
+        rect(term_x, 0, term_w, term_h, TERM_BG, rx=10, stroke=TERM_BORDER, sw=1, extra='filter="url(#softShadow)"'),
+        f"""<path d="M{term_x+10},0 h{term_w-20} a10,10 0 0 1 10,10 v{bar_h-10}
+             h{-term_w} v{-bar_h+10} a10,10 0 0 1 10,-10 z" fill="{TERM_BAR}"/>""",
+        line(term_x, bar_h, term_x + term_w, bar_h, TERM_BORDER, 1),
+        line(term_x + 10, 0.6, term_x + term_w - 10, 0.6, "#ffffff", 1, opacity=0.06),
+        circle(term_x + 22, bar_h / 2, 6, RED_DOT),
+        circle(term_x + 42, bar_h / 2, 6, YEL_DOT),
+        circle(term_x + 62, bar_h / 2, 6, GRN_DOT),
+        text(
+            term_x + term_w / 2,
+            bar_h / 2 + 5,
+            "uday@bangalore:~",
+            12,
+            DIM,
+            450,
+            family="JB",
+            anchor="middle",
+        ),
+    ]
+    links, lh = link_row(CONTENT_X + CONTENT_W / 2, term_h + 44)
+    inner = "\n".join(window + body + [links])
+    content_h = term_h + 44 + lh
+    return readme_chrome(inner, content_h)
+
+
+def build_decoder() -> tuple[str, int]:
+    cx = CONTENT_X + CONTENT_W / 2
+    parts = []
+    y = 0
+
+    parts.append(
+        text(
+            cx,
+            y,
+            "the name unscrambles on load",
+            11.5,
+            DIM,
+            400,
+            family="JB",
+            anchor="middle",
+            letter_spacing=0.6,
+        )
+    )
+    y += 26
+    strip, sh = decoder_strip(cx, y, scale=1.0)
+    parts.append(strip)
+    y += sh + 44
+
+    rule_w = 72
+    parts.append(line(cx - rule_w / 2, y, cx + rule_w / 2, y, CARD_BORDER, 1))
+    y += 56
+
+    parts.append(
+        text(
+            cx,
+            y,
+            FULL_NAME,
+            44,
+            NAME,
+            600,
+            family="JB",
+            anchor="middle",
+            letter_spacing=0.6,
+        )
+    )
+    y += 38
+    parts.append(
+        text(cx, y, TAGLINE, 18, MUTED, 400, family="JB", anchor="middle", italic=True)
+    )
+    y += 42
+    parts.append(stack_row(cx, y, size=13, weight=450, fill=DIM))
+    y += 48
+    links, lh = link_row(cx, y)
+    parts.append(links)
+    y += lh
+    return readme_chrome("\n".join(parts), y)
+
+
+def build_commit_log(include_decoder_header: bool = False) -> tuple[str, int]:
+    cx = CONTENT_X + CONTENT_W / 2
+    parts = []
+    y = 0
+
+    if include_decoder_header:
+        parts.append(
+            text(
+                cx,
+                y,
+                "the name unscrambles on load",
+                11.5,
+                DIM,
+                400,
+                family="JB",
+                anchor="middle",
+                letter_spacing=0.6,
+            )
+        )
+        y += 24
+        strip, sh = decoder_strip(cx, y, scale=0.92)
+        parts.append(strip)
+        y += sh + 40
+        parts.append(
+            text(
+                cx,
+                y,
+                FULL_NAME,
+                40,
+                NAME,
+                600,
+                family="JB",
+                anchor="middle",
+                letter_spacing=0.5,
+            )
+        )
+        y += 36
+        parts.append(
+            text(cx, y, TAGLINE, 17, MUTED, 400, family="JB", anchor="middle", italic=True)
+        )
+        y += 26
+        parts.append(
+            text(cx, y, f"{ROLE}  ·  {LOCATION}", 13, DIM, 400, family="JB", anchor="middle")
+        )
+        y += 36
+        rule_w = 72
+        parts.append(line(cx - rule_w / 2, y, cx + rule_w / 2, y, CARD_BORDER, 1))
+        y += 40
+    else:
+        parts.append(
+            text(
+                cx,
+                y,
+                FULL_NAME,
+                28,
+                NAME,
+                600,
+                family="JB",
+                anchor="middle",
+            )
+        )
+        y += 28
+        parts.append(
+            text(cx, y, TAGLINE, 16, MUTED, 400, family="JB", anchor="middle", italic=True)
+        )
+        y += 24
+        parts.append(
+            text(cx, y, f"{ROLE}  ·  {LOCATION}", 13, DIM, 400, family="JB", anchor="middle")
+        )
+        y += 36
+        rule_w = 72
+        parts.append(line(cx - rule_w / 2, y, cx + rule_w / 2, y, CARD_BORDER, 1))
+        y += 40
+
+    # git log — messages include years as specified; (HEAD) decorates the tip.
+    # Columns: hash | decorate | type | message
+    # so type+message stay vertically aligned.
+    hash_size = 14
+    msg_size = 14
+    commits = [
+        ("e4d07b2", "HEAD", "wip:", "all-stack's + AI", ORANGE),
+        ("8c2b91a", "", "feat:", "joined corporate role (2025)", GREEN_SOFT),
+        ("a3f1c2e", "", "feat:", "started building software (2023)", GREEN_SOFT),
+    ]
+    hash_w = tw("e4d07b2", hash_size, 500)
+    deco_w = tw("(HEAD)", 13, 450)
+    type_w = tw("feat:", msg_size, 500)
+    msg_w = max(tw(m, msg_size, 400) for *_, m, _ in commits)
+    col_gap = 20
+    col_w = hash_w + col_gap + deco_w + col_gap + type_w + 12 + msg_w
+    col_x = cx - col_w / 2
+
+    parts.append(text(col_x, y, "$", 14, GREEN, 500))
+    parts.append(text(col_x + 20, y, "git log", 14, TEXT, 400))
+    y += 36
+
+    hash_x = col_x
+    deco_x = hash_x + hash_w + col_gap
+    type_x = deco_x + deco_w + col_gap
+    msg_x = type_x + type_w + 12
+
+    for hsh, deco, typ, msg, pcolor in commits:
+        parts.append(text(hash_x, y, hsh, hash_size, YELLOW, 500))
+        if deco:
+            parts.append(text(deco_x, y, f"({deco})", 13, CYAN, 450))
+        parts.append(text(type_x, y, typ, msg_size, pcolor, 500))
+        parts.append(text(msg_x, y, msg, msg_size, TEXT, 400))
+        y += 34
+
+    y += 32
+    parts.append(stack_row(cx, y, size=12.5, weight=450, fill=DIM))
+    y += 44
+
+    links, lh = link_row(cx, y)
+    parts.append(links)
+    y += lh
+    return readme_chrome("\n".join(parts), y)
+
+
+def build_combo() -> tuple[str, int]:
+    return build_commit_log(include_decoder_header=True)
+
+
+LINKEDIN_URL = "https://www.linkedin.com/in/uday-kiran-reddy-n-7845b0280/"
+MEDIUM_URL = "https://medium.com/@uday410ry"
+MAIL_URL = f"mailto:{EMAIL}"
+LINK_GAP_BEFORE = 44
+# Former caption row reserved 24px before the scramble strip; name keeps that inset.
+PROFILE_NAME_TOP = 24
+# Large name ascenders extend above the baseline; extend viewBox upward slightly.
+PROFILE_VIEWBOX_TOP = -24
+MIDDOT = "\u00b7"
+NAME_SIZE = 40
+NAME_WEIGHT = 600
+NAME_LETTER_SPACING = 0.5
+NAME_ANIM_STEP_MS = 110  # 80–120ms per frame → ~1–1.2s total
+# Non-zero so <img> snapshots at t=0 keep the base name visible (no begin="0ms" flash).
+NAME_ANIM_START_MS = 10
+NAME_UNSCRAMBLE_OVERLAY_FRAMES = [
+    "U#4y K!r@n R3d*y",
+    "Ud?y Ki?an Re??y",
+    "Ud?y Kiran Re??y",
+    "Uday Ki?an Re??y",
+    "Uday Kir?an Re??y",
+    "Uday Kiran Re??y",
+    "Uday Kiran Red*y",
+    "Uday Kiran Re?dy",
+    "Uday Kiran Red?y",
+]
+
+
+def name_unscramble_overlay_frames() -> list[str]:
+    """Scrambled states only (final name is the always-visible base layer)."""
+    final = FULL_NAME
+    frames = [s for s in NAME_UNSCRAMBLE_OVERLAY_FRAMES if len(s) == len(final)]
+    assert frames and frames[-1] != final, "overlays must not include settled name"
+    return frames
+
+
+def name_unscramble_end_ms(overlay_count: int | None = None) -> int:
+    n = overlay_count if overlay_count is not None else len(name_unscramble_overlay_frames())
+    return NAME_ANIM_START_MS + n * NAME_ANIM_STEP_MS + 60
+
+
+def name_unscramble_svg(cx: float, y: float) -> str:
+    """SMIL decode: one visible frame at a time; settled name default for non-SMIL."""
+    overlays = name_unscramble_overlay_frames()
+    step_ms = NAME_ANIM_STEP_MS
+    start_ms = NAME_ANIM_START_MS
+    end_ms = name_unscramble_end_ms(len(overlays))
+    n = len(overlays)
+
+    def ms(s: int) -> str:
+        return f"{s / 1000.0:.3f}s"
+
+    name_attrs = (
+        f'font-family="JB" font-size="{NAME_SIZE}" font-weight="{NAME_WEIGHT}" '
+        f'text-anchor="middle" letter-spacing="{NAME_LETTER_SPACING}" xml:space="preserve"'
+    )
+    bits = ['<g id="profile-name-unscramble">']
+    # Base: default visible for <img> / static; hidden from t=0 through scramble for SMIL.
+    bits.append(
+        f'<text id="profile-name-settled" x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" {name_attrs}>'
+        f"{esc(FULL_NAME)}"
+        f'<set attributeName="opacity" to="0" begin="0s" fill="freeze"/>'
+        f'<set attributeName="display" to="none" begin="0s" fill="freeze"/>'
+        f'<set attributeName="opacity" to="1" begin="{ms(end_ms)}" fill="freeze"/>'
+        f'<set attributeName="display" to="inline" begin="{ms(end_ms)}" fill="freeze"/>'
+        f"</text>"
+    )
+
+    bits.append(
+        '<g id="profile-name-scrambles" '
+        'requiredFeatures="http://www.w3.org/TR/SVG11/feature#Animation">'
+        f'<set attributeName="display" to="none" begin="{ms(end_ms)}" fill="freeze"/>'
+        f'<set attributeName="visibility" to="hidden" begin="{ms(end_ms)}" fill="freeze"/>'
+        f'<set attributeName="opacity" to="0" begin="{ms(end_ms)}" fill="freeze"/>'
+    )
+    # One absolute <text> per frame (text-anchor=middle on each); never use flowing tspans.
+    for i, label in enumerate(overlays):
+        t0 = start_ms + i * step_ms
+        t1 = t0 + step_ms
+        bits.append(
+            f'<text id="profile-name-frame-{i}" x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" '
+            f"{name_attrs} display=\"none\" visibility=\"hidden\" opacity=\"0\">"
+            f"{esc(label)}"
+            f'<set attributeName="display" to="inline" begin="{ms(t0)}" fill="freeze"/>'
+            f'<set attributeName="visibility" to="visible" begin="{ms(t0)}" fill="freeze"/>'
+            f'<set attributeName="opacity" to="1" begin="{ms(t0)}" fill="freeze"/>'
+            f'<set attributeName="display" to="none" begin="{ms(t1)}" fill="freeze"/>'
+            f'<set attributeName="visibility" to="hidden" begin="{ms(t1)}" fill="freeze"/>'
+            f'<set attributeName="opacity" to="0" begin="{ms(t1)}" fill="freeze"/>'
+            f'<set attributeName="display" to="none" begin="{ms(end_ms)}" fill="freeze"/>'
+            f'<set attributeName="visibility" to="hidden" begin="{ms(end_ms)}" fill="freeze"/>'
+            f'<set attributeName="opacity" to="0" begin="{ms(end_ms)}" fill="freeze"/>'
+            f"</text>"
+        )
+    bits.append("</g></g>")
+    return "\n".join(bits)
+
+
+def build_combo_profile_inner() -> tuple[str, float]:
+    """Profile main artwork (name → git log → stack) without links; combo coordinates."""
+    cx = CONTENT_X + CONTENT_W / 2
+    parts: list[str] = []
+    y = float(PROFILE_NAME_TOP)
+
+    parts.append(name_unscramble_svg(cx, y))
+    y += 36
+    parts.append(
+        text(cx, y, TAGLINE, 17, MUTED, 400, family="JB", anchor="middle", italic=True)
+    )
+    y += 26
+    parts.append(
+        text(
+            cx,
+            y,
+            f"{ROLE}\u00a0\u00a0{MIDDOT}\u00a0\u00a0{LOCATION}",
+            13,
+            DIM,
+            400,
+            family="JB",
+            anchor="middle",
+        )
+    )
+    y += 36
+    rule_w = 72
+    parts.append(line(cx - rule_w / 2, y, cx + rule_w / 2, y, CARD_BORDER, 1))
+    y += 40
+
+    hash_size = 14
+    msg_size = 14
+    commits = [
+        ("e4d07b2", "HEAD", "wip:", "all-stack's + AI", ORANGE),
+        ("8c2b91a", "", "feat:", "joined corporate role (2025)", GREEN_SOFT),
+        ("a3f1c2e", "", "feat:", "started building software (2023)", GREEN_SOFT),
+    ]
+    hash_w = tw("e4d07b2", hash_size, 500)
+    deco_w = tw("(HEAD)", 13, 450)
+    type_w = tw("feat:", msg_size, 500)
+    msg_w = max(tw(m, msg_size, 400) for *_, m, _ in commits)
+    col_gap = 20
+    col_w = hash_w + col_gap + deco_w + col_gap + type_w + 12 + msg_w
+    col_x = cx - col_w / 2
+
+    parts.append(text(col_x, y, "$", 14, GREEN, 500))
+    parts.append(text(col_x + 20, y, "git log", 14, TEXT, 400))
+    y += 36
+
+    hash_x = col_x
+    deco_x = hash_x + hash_w + col_gap
+    type_x = deco_x + deco_w + col_gap
+    msg_x = type_x + type_w + 12
+
+    for hsh, deco, typ, msg, pcolor in commits:
+        parts.append(text(hash_x, y, hsh, hash_size, YELLOW, 500))
+        if deco:
+            parts.append(text(deco_x, y, f"({deco})", 13, CYAN, 450))
+        parts.append(text(type_x, y, typ, msg_size, pcolor, 500))
+        parts.append(text(msg_x, y, msg, msg_size, TEXT, 400))
+        y += 34
+
+    y += 32
+    parts.append(stack_row(cx, y, size=12.5, weight=450, fill=DIM))
+
+    return "\n".join(parts), y
+
+
+def build_profile_main_svg() -> tuple[str, int]:
+    inner, content_bottom = build_combo_profile_inner()
+    h = math.ceil(content_bottom + LINK_GAP_BEFORE)
+    w = CONTENT_W
+    top = PROFILE_VIEWBOX_TOP
+    vb_h = h - top
+    svg = "\n".join(
+        [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{w}" height="{h}" viewBox="{CONTENT_X:.0f} {top} {w} {vb_h}">',
+            defs(),
+            rect(CONTENT_X, top, w, vb_h, PAGE),
+            inner,
+            "</svg>",
+        ]
+    )
+    return svg, h
+
+
+def build_link_item_svg(label: str, *, kind: str) -> tuple[str, int, int]:
+    text_w = tw(label, LINK_FONT_SIZE, 450)
+    w = int(LINK_ICON_SLOT_W + LINK_ICON_GAP + text_w + 1)
+    h = LINK_ROW_H
+    svg = "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">',
+            defs(),
+            link_icon_markup(kind, 0),
+            text(
+                LINK_ICON_SLOT_W + LINK_ICON_GAP,
+                LINK_LABEL_BASELINE,
+                label,
+                LINK_FONT_SIZE,
+                LINK,
+                450,
+                family="JB",
+            ),
+            "</svg>",
+        ]
+    )
+    return svg, w, h
+
+
+def build_link_sep_svg() -> tuple[str, int, int]:
+    gap_item = 36
+    size = 13.5
+    h = 24
+    svg = "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{gap_item}" height="{h}" viewBox="0 0 {gap_item} {h}">',
+            defs(),
+            text(gap_item / 2, 18, "·", size, FAINT, 400, family="JB", anchor="middle"),
+            "</svg>",
+        ]
+    )
+    return svg, gap_item, h
+
+
+def write_readme_md(dest: Path) -> None:
+    # GitHub strips <style> and inline CSS; each <a> must contain only a single <img>.
+    link_row = (
+        f'<a href="{LINKEDIN_URL}"><img src="assets/link-linkedin.svg" height="24" alt="" /></a>'
+        f'<img src="assets/link-sep.svg" height="24" alt="" />'
+        f'<a href="{MAIL_URL}"><img src="assets/link-email.svg" height="24" alt="" /></a>'
+        f'<img src="assets/link-sep.svg" height="24" alt="" />'
+        f'<a href="{MEDIUM_URL}"><img src="assets/link-medium.svg" height="24" alt="" /></a>'
+    )
+    dest.write_text(
+        "\n".join(
+            [
+                '<div align="center">',
+                f'<img src="assets/profile-main.svg" width="{CONTENT_W}" alt="" />',
+                link_row,
+                "</div>",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def build_profile_assets(out_dir: Path | None = None) -> None:
+    out_dir = out_dir or OUT
+    out_dir.mkdir(parents=True, exist_ok=True)
+    repo_root = Path(__file__).resolve().parent
+
+    main_svg, _ = build_profile_main_svg()
+    (out_dir / "profile-main.svg").write_text(main_svg, encoding="utf-8")
+
+    link_items = (
+        ("link-linkedin.svg", "linkedin", LINKEDIN_LABEL),
+        ("link-email.svg", "email", EMAIL),
+        ("link-medium.svg", "medium", MEDIUM_LABEL),
+    )
+    for name, kind, label in link_items:
+        svg, _, _ = build_link_item_svg(label, kind=kind)
+        (out_dir / name).write_text(svg, encoding="utf-8")
+
+    sep, _, _ = build_link_sep_svg()
+    (out_dir / "link-sep.svg").write_text(sep, encoding="utf-8")
+
+    write_readme_md(repo_root / "README.md")
+    print(f"Wrote profile assets under {out_dir}")
+
+
+def _chrome_screenshot_html(
+    html_path: Path,
+    dest: Path,
+    page_w: int,
+    page_h: int,
+    scale: int = 2,
+    virtual_time_ms: int = 0,
+) -> None:
+    chrome = Path("/opt/google/chrome/chrome")
+    if not chrome.exists():
+        chrome = Path("google-chrome")
+    png_tmp = dest.with_suffix(".raw.png")
+    cmd = [
+        str(chrome),
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--hide-scrollbars",
+        "--allow-file-access-from-files",
+        f"--force-device-scale-factor={scale}",
+        f"--window-size={page_w},{page_h}",
+        "--default-background-color=0d1117",
+        "--run-all-compositor-stages-before-draw",
+        f"--screenshot={png_tmp}",
+        html_path.resolve().as_uri(),
+    ]
+    if virtual_time_ms > 0:
+        cmd.insert(-1, f"--virtual-time-budget={virtual_time_ms}")
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+    if r.returncode != 0 or not png_tmp.exists():
+        raise RuntimeError(f"chrome failed: {r.returncode}\n{r.stdout}\n{r.stderr}")
+    from PIL import Image
+
+    im = Image.open(png_tmp)
+    im.save(dest, "PNG", optimize=True)
+    png_tmp.unlink(missing_ok=True)
+
+
+def render_profile_main_static_png(svg_path: Path, dest: Path, height: int, scale: int = 2) -> None:
+    """Rasterize without SMIL (matches GitHub <img> / non-animated viewers)."""
+    import cairosvg
+
+    w = CONTENT_W * scale
+    h = height * scale
+    tmp = dest.with_suffix(".cairo.png")
+    cairosvg.svg2png(
+        url=str(svg_path),
+        write_to=str(tmp),
+        output_width=w,
+        output_height=h,
+    )
+    from PIL import Image
+
+    im = Image.open(tmp).convert("RGB")
+    im.save(dest, "PNG", optimize=True)
+    tmp.unlink(missing_ok=True)
+
+
+def render_readme_settled_preview(
+    repo_root: Path, dest: Path, page_w: int = 1012, scale: int = 2
+) -> None:
+    """Full README preview with static main SVG raster (no SMIL on <img>)."""
+    import base64
+
+    svg_path = repo_root / "assets" / "profile-main.svg"
+    _, h = build_profile_main_svg()
+    static_png = dest.parent / "profile-main-static-raster.png"
+    render_profile_main_static_png(svg_path, static_png, h, scale)
+    b64 = base64.b64encode(static_png.read_bytes()).decode("ascii")
+    data_uri = f"data:image/png;base64,{b64}"
+    readme = repo_root / "README.md"
+    body = readme.read_text(encoding="utf-8").replace(
+        'src="assets/profile-main.svg"',
+        f'src="{data_uri}"',
+        1,
+    )
+    html_path = repo_root / "_readme_settled_preview.html"
+    html_path.write_text(_inline_svg_html(body, page_w), encoding="utf-8")
+    _chrome_screenshot_html(html_path, dest, page_w, 620, scale, 0)
+    html_path.unlink(missing_ok=True)
+    static_png.unlink(missing_ok=True)
+    print(f"readme preview (settled static): {dest} {dest.stat().st_size}")
+
+
+def _inline_svg_html(body: str, page_w: int) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<style>html,body{{margin:0;padding:0;background:{PAGE};width:{page_w}px}}</style>
+</head>
+<body>{body}</body></html>"""
+
+
+def _name_centroid_x(im_path: Path, band_px: int = 100) -> float | None:
+    """Horizontal center of the name ink (bounding box of bright top band pixels)."""
+    import numpy as np
+    from PIL import Image
+
+    gray = np.array(Image.open(im_path).convert("L"))
+    band = gray[: min(band_px, gray.shape[0]), :]
+    mask = band > 210
+    if not mask.any():
+        return None
+    cols = np.where(mask.any(axis=0))[0]
+    return float(cols[0] + cols[-1]) / 2.0
+
+
+def _link_chip_ink_metrics(
+    png_path: Path,
+    *,
+    scale: int = 4,
+    icon_slot_css: float = LINK_ICON_SLOT_W,
+    gap_start_css: float = LINK_ICON_SLOT_W + LINK_ICON_GAP,
+) -> dict[str, float]:
+    """Ink bounding boxes for icon slot and label (CSS px)."""
+    import numpy as np
+    from PIL import Image
+
+    arr = np.array(Image.open(png_path).convert("RGB"))
+    # Link chip ink #58a6ff (icons + labels); ignore near-background screenshot fringe.
+    ink = (
+        (arr[:, :, 2] > 200)
+        & (arr[:, :, 1] > 120)
+        & (arr[:, :, 0] < 120)
+    )
+    slot_max_x = int(round(icon_slot_css * scale))
+    gap_min_x = int(round(gap_start_css * scale))
+    h_px, w_px = ink.shape
+    col = np.arange(w_px)
+    icon_mask = ink & (col < slot_max_x)
+    label_mask = ink & (col >= gap_min_x)
+    if not icon_mask.any() or not label_mask.any():
+        raise RuntimeError(f"no ink in {png_path}")
+
+    icon_ys, icon_xs = np.where(icon_mask)
+    label_ys, label_xs = np.where(label_mask)
+    icon_top = float(icon_ys.min()) / scale
+    icon_bot = float(icon_ys.max()) / scale
+    icon_left = float(icon_xs.min()) / scale
+    icon_h = icon_bot - icon_top
+    icon_w = float(icon_xs.max()) / scale - icon_left
+    icon_cy = (icon_top + icon_bot) / 2.0
+    icon_right = float(icon_xs.max()) / scale
+    ink_area = float(icon_mask.sum()) / (scale * scale)
+
+    label_top = float(label_ys.min()) / scale
+    label_bot = float(label_ys.max()) / scale
+    label_cy = (label_top + label_bot) / 2.0
+    label_left = float(label_xs.min()) / scale
+    gap = label_left - icon_right
+
+    return {
+        "icon_h": icon_h,
+        "icon_w": icon_w,
+        "ink_area": ink_area,
+        "icon_cy": icon_cy,
+        "label_cy": label_cy,
+        "gap": gap,
+    }
+
+
+def verify_link_icon_uniformity(repo_root: Path, *, scale: int = 4) -> None:
+    """Chrome 4× renders + ink bbox assertions (≤1 CSS px tolerance)."""
+    import os
+    import subprocess
+
+    artifact_dir = Path("/opt/cursor/artifacts")
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    script = repo_root / "scripts" / "verify-link-icons.mjs"
+    npm = repo_root / "node_modules" / "puppeteer-core"
+    if not npm.exists():
+        subprocess.run(
+            ["npm", "install", "puppeteer-core@24", "--no-save"],
+            cwd=repo_root,
+            check=True,
+            timeout=120,
+        )
+    env = {**os.environ, "ARTIFACT_DIR": str(artifact_dir)}
+    r = subprocess.run(
+        ["node", str(script)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"link icon capture failed:\n{r.stdout}\n{r.stderr}")
+    print(r.stdout.strip())
+
+    names = ["linkedin", "email", "medium"]
+    metrics: dict[str, dict[str, float]] = {}
+    for name in names:
+        p = artifact_dir / f"link-icon-{name}-{scale}x.png"
+        metrics[name] = _link_chip_ink_metrics(p, scale=scale)
+
+    tol = 1.0
+    area_tol = 0.10
+    label_x_cy = link_label_xheight_center_y()
+    areas = [m["ink_area"] for m in metrics.values()]
+    cy_icons = [m["icon_cy"] for m in metrics.values()]
+    gaps = [m["gap"] for m in metrics.values()]
+
+    print("\nlink icon uniformity (CSS px):")
+    print(
+        f"{'chip':<10} {'icon_h':>7} {'icon_w':>7} {'ink_area':>9} "
+        f"{'icon_cy':>8} {'gap':>7}"
+    )
+    print(f"{'(x-height)':<10} {'':>7} {'':>7} {'':>9} {label_x_cy:8.2f}")
+    for name in names:
+        m = metrics[name]
+        print(
+            f"{name:<10} {m['icon_h']:7.2f} {m['icon_w']:7.2f} {m['ink_area']:9.1f} "
+            f"{m['icon_cy']:8.2f} {m['gap']:7.2f}"
+        )
+
+    area_mean = sum(areas) / len(areas)
+    area_spread = (max(areas) - min(areas)) / area_mean if area_mean else 0.0
+    if area_spread > area_tol:
+        raise RuntimeError(
+            f"ink area spread {area_spread * 100:.1f}% > {area_tol * 100:.0f}%: {areas}"
+        )
+    ref_cy = sum(cy_icons) / len(cy_icons)
+    for name, cy in zip(names, cy_icons, strict=True):
+        if abs(cy - ref_cy) > tol:
+            raise RuntimeError(
+                f"{name} icon center {cy:.2f} vs mean {ref_cy:.2f} (>{tol}px)"
+            )
+    for name, cy in zip(names, cy_icons, strict=True):
+        if abs(cy - label_x_cy) > tol:
+            raise RuntimeError(
+                f"{name} icon center {cy:.2f} vs x-height center {label_x_cy:.2f}"
+            )
+    gap_spread = max(gaps) - min(gaps)
+    if gap_spread > tol:
+        raise RuntimeError(f"icon-label gaps spread {gap_spread:.2f}px > {tol}px")
+
+    print(
+        f"OK: ink area spread {area_spread * 100:.1f}%, gap spread {gap_spread:.2f}px"
+    )
+
+
+def save_link_row_zoom(readme_png: Path, dest: Path, zoom: int = 3) -> None:
+    """Crop link row from full README render and upscale for visual QA."""
+    import numpy as np
+    from PIL import Image
+
+    im = Image.open(readme_png).convert("RGB")
+    arr = np.array(im)
+    w, h = arr.shape[1], arr.shape[0]
+    # Link blue #58a6ff ≈ (88, 166, 255)
+    linkish = (arr[:, :, 2] > 200) & (arr[:, :, 1] > 120) & (arr[:, :, 0] < 120)
+    row_scores = linkish.sum(axis=1)
+    y_hit = int(np.argmax(row_scores))
+    if row_scores[y_hit] < 40:
+        y_hit = h - max(int(h * 0.08), 120)
+    pad = 28
+    y0 = max(0, y_hit - pad)
+    y1 = min(h, y_hit + pad)
+    crop = im.crop((int(w * 0.12), y0, int(w * 0.88), y1))
+    if zoom != 1:
+        crop = crop.resize(
+            (crop.size[0] * zoom, crop.size[1] * zoom), Image.Resampling.LANCZOS
+        )
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    crop.save(dest, "PNG", optimize=True)
+    print(f"link row zoom {zoom}x: {dest} {crop.size}")
+
+
+def render_readme_settled_puppeteer(repo_root: Path, dest: Path) -> None:
+    """Full README at 3s via puppeteer (SMIL on profile <img>)."""
+    import os
+    import subprocess
+
+    script = repo_root / "scripts" / "capture-readme-settled.mjs"
+    env = {
+        **os.environ,
+        "ARTIFACT_DIR": str(dest.parent),
+        "README_VERIFY_PATH": str(dest),
+        "README_SETTLE_MS": "3000",
+    }
+    r = subprocess.run(
+        ["node", str(script)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"readme puppeteer failed:\n{r.stdout}\n{r.stderr}")
+    print(r.stdout.strip())
+
+
+def verify_profile_name_animation(repo_root: Path) -> None:
+    """SMIL via <img> in real Chrome (puppeteer-core) + real-time waits."""
+    import os
+    import shutil
+    import subprocess
+    from PIL import Image
+
+    artifact_dir = Path("/opt/cursor/artifacts")
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    svg_path = repo_root / "assets" / "profile-main.svg"
+    if not svg_path.exists():
+        build_profile_assets(repo_root / "assets")
+
+    script = repo_root / "scripts" / "verify-profile-smil-img.mjs"
+    if not script.exists():
+        raise RuntimeError(f"missing {script}")
+
+    npm = repo_root / "node_modules" / "puppeteer-core"
+    if not npm.exists():
+        subprocess.run(
+            ["npm", "install", "puppeteer-core@24", "--no-save"],
+            cwd=repo_root,
+            check=True,
+            timeout=120,
+        )
+
+    env = {
+        **os.environ,
+        "ARTIFACT_DIR": str(artifact_dir),
+        "PROFILE_SMIL_DELAYS": os.environ.get("PROFILE_SMIL_DELAYS", "100,400,3000"),
+    }
+    r = subprocess.run(
+        ["node", str(script)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"puppeteer verify failed:\n{r.stdout}\n{r.stderr}")
+    print(r.stdout.strip())
+
+    delays = [int(x) for x in env["PROFILE_SMIL_DELAYS"].split(",")]
+    centroids: dict[int, float] = {}
+    for ms in delays:
+        p = artifact_dir / f"profile-name-img-{ms}ms.png"
+        cx = _name_centroid_x(p)
+        if cx is not None:
+            centroids[ms] = cx
+            print(f"name centroid @ {ms}ms: x={cx:.1f}px (img width {Image.open(p).size[0]})")
+
+    if len(centroids) >= 2:
+        ref = centroids.get(3000) or centroids.get(900)
+        if ref is not None:
+            for ms, cx in centroids.items():
+                drift = abs(cx - ref)
+                print(f"  drift vs settled @ {ms}ms: {drift:.1f}px")
+                if drift > 20:
+                    raise RuntimeError(
+                        f"name off-center at {ms}ms (centroid {cx:.0f}, settled {ref:.0f})"
+                    )
+
+    settled = artifact_dir / "profile-name-img-3000ms.png"
+    legacy70 = artifact_dir / "profile-name-mid-scramble-70ms.png"
+    legacy350 = artifact_dir / "profile-name-mid-scramble-350ms.png"
+    img100 = artifact_dir / "profile-name-img-100ms.png"
+    img400 = artifact_dir / "profile-name-img-400ms.png"
+    if settled.exists():
+        shutil.copy2(settled, artifact_dir / "profile-name-settled.png")
+    if img100.exists():
+        shutil.copy2(img100, legacy70)
+    if img400.exists():
+        shutil.copy2(img400, legacy350)
+
+
+def render_readme_preview(
+    repo_root: Path,
+    dest: Path,
+    page_w: int = 1012,
+    scale: int = 2,
+    virtual_time_ms: int = 0,
+) -> None:
+    """Render README.md like GitHub profile (dark, ~1012px content column)."""
+    from PIL import Image
+
+    readme = repo_root / "README.md"
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  html, body {{
+    margin: 0;
+    padding: 24px 0;
+    width: {page_w}px;
+    background: {PAGE};
+    color-scheme: dark;
+  }}
+  body {{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }}
+  .markdown-body {{
+    max-width: {page_w}px;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }}
+  img {{ border: none; vertical-align: middle; }}
+  .markdown-body a {{ color: #58a6ff; text-decoration: underline; }}
+</style>
+</head>
+<body>
+<div class="markdown-body">
+{readme.read_text(encoding="utf-8")}
+</div>
+</body>
+</html>
+"""
+    html_path = repo_root / "_readme_preview.html"
+    html_path.write_text(html, encoding="utf-8")
+    png_tmp = dest.with_suffix(".raw.png")
+    chrome = Path("/opt/google/chrome/chrome")
+    if not chrome.exists():
+        chrome = Path("google-chrome")
+    cmd = [
+        str(chrome),
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--hide-scrollbars",
+        "--allow-file-access-from-files",
+        f"--force-device-scale-factor={scale}",
+        f"--window-size={page_w},620",
+        "--default-background-color=0d1117",
+        "--run-all-compositor-stages-before-draw",
+        f"--screenshot={png_tmp}",
+        html_path.resolve().as_uri(),
+    ]
+    if virtual_time_ms > 0:
+        cmd.insert(-1, f"--virtual-time-budget={virtual_time_ms}")
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(repo_root), timeout=90)
+    if r.returncode != 0 or not png_tmp.exists():
+        raise RuntimeError(f"chrome failed: {r.returncode}\n{r.stdout}\n{r.stderr}")
+    im = Image.open(png_tmp)
+    im.save(dest, "PNG", optimize=True)
+    png_tmp.unlink(missing_ok=True)
+    html_path.unlink(missing_ok=True)
+    print(f"readme preview: {dest} {im.size}")
+
+
+def render_svg(svg: str, height: int, dest: Path, scale: int = 2) -> None:
+    dest = Path(dest)
+    svg_path = dest.with_suffix(".svg")
+    svg_path.write_text(svg, encoding="utf-8")
+
+    # Render via headless Chrome, loading the SVG as an image so HTML
+    # whitespace collapsing cannot touch the text nodes.
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  html, body {{
+    margin: 0;
+    padding: 0;
+    width: {W}px;
+    height: {height}px;
+    background: {PAGE};
+    overflow: hidden;
+  }}
+  img {{ display: block; width: {W}px; height: {height}px; }}
+</style>
+</head>
+<body>
+<img src="{svg_path.name}" width="{W}" height="{height}" alt="preview"/>
+</body>
+</html>
+"""
+    html_path = dest.with_suffix(".html")
+    html_path.write_text(html, encoding="utf-8")
+    png_tmp = dest.with_suffix(".raw.png")
+    chrome = Path("/opt/google/chrome/chrome")
+    if not chrome.exists():
+        chrome = Path("google-chrome")
+    cmd = [
+        str(chrome),
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--hide-scrollbars",
+        "--allow-file-access-from-files",
+        f"--force-device-scale-factor={scale}",
+        f"--window-size={W},{height}",
+        "--default-background-color=0d1117",
+        f"--screenshot={png_tmp}",
+        f"file://{html_path}",
+    ]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0 or not png_tmp.exists():
+        raise RuntimeError(f"chrome failed: {r.returncode}\n{r.stdout}\n{r.stderr}")
+    # Trim any unexpected chrome pixel rounding, ensure exact size
+    from PIL import Image
+
+    im = Image.open(png_tmp)
+    target = (W * scale, height * scale)
+    if im.size != target:
+        # crop to target if slightly larger, or leave if close
+        im = im.crop((0, 0, min(im.width, target[0]), min(im.height, target[1])))
+        if im.size != target:
+            canvas = Image.new("RGB", target, (13, 17, 23))
+            canvas.paste(im, (0, 0))
+            im = canvas
+    im.save(dest, "PNG", optimize=True)
+    png_tmp.unlink(missing_ok=True)
+    html_path.unlink(missing_ok=True)
+    print(f"wrote {svg_path} ({svg_path.stat().st_size/1e6:.2f} MB) and {dest} {im.size}")
+
+
+def main():
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "profile":
+        build_profile_assets()
+        return
+    if len(sys.argv) > 1 and sys.argv[1] == "verify":
+        repo = Path(__file__).resolve().parent
+        artifact = Path("/opt/cursor/artifacts/readme-profile-verify.png")
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        render_readme_settled_puppeteer(repo, artifact)
+        save_link_row_zoom(artifact, artifact.parent / "readme-link-row-4x.png", 4)
+        verify_link_icon_uniformity(repo)
+        verify_profile_name_animation(repo)
+        ref = Path(
+            "/home/ubuntu/.cursor/projects/agent-repos-UdaykiranReddy-1/assets/04-combo.png"
+        )
+        if ref.exists():
+            combo_svg, combo_h = build_combo()
+            combo_png = artifact.with_name("combo-reference-render.png")
+            render_svg(combo_svg, combo_h, combo_png, scale=2)
+            from PIL import Image
+
+            got = Image.open(artifact).convert("RGB")
+            # Crop reference card interior (no chrome header): x=208..2190 at 2x
+            ref_im = Image.open(ref).convert("RGB")
+            inner = ref_im.crop((208, 264, 208 + 1984, ref_im.height - 80))
+            print(f"reference inner crop: {inner.size}, readme render: {got.size}")
+        return
+    builds = [
+        ("01-terminal-card.png", build_terminal),
+        ("02-decoder-line.png", build_decoder),
+        ("03-commit-log-bio.png", build_commit_log),
+        ("04-combo.png", build_combo),
+    ]
+    for name, fn in builds:
+        svg, h = fn()
+        render_svg(svg, h, OUT / name, scale=2)
+
+
+if __name__ == "__main__":
+    main()
