@@ -41,19 +41,19 @@ text { font-synthesis: none; }
 <text id="profile-name-frame-7" x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve" display="none" visibility="hidden" opacity="0">Uday Kiran Red?y<set attributeName="display" to="inline" begin="0.780s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.780s" fill="freeze"/><set attributeName="opacity" to="1" begin="0.780s" fill="freeze"/><set attributeName="display" to="none" begin="0.890s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.890s" fill="freeze"/><set attributeName="opacity" to="0" begin="0.890s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/><set attributeName="opacity" to="0" begin="0.950s" fill="freeze"/></text>
 </g></g>
 <text x="600.00" y="60.00" fill="#8b949e" font-family="JB" font-size="17" font-weight="400" text-anchor="middle" font-style="italic" xml:space="preserve">I code and decode stuff</text>
-<text x="600.00" y="86.00" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Full-Stack Developer  ·  Bangalore, India</text>
+<text x="600.00" y="86.00" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Any-Stack Developer  ·  Bangalore, India</text>
 <line x1="564.00" y1="122.00" x2="636.00" y2="122.00" stroke="#30363d" stroke-width="1" stroke-linecap="round" />
 <text x="365.67" y="162.00" fill="#3fb950" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">$</text>
 <text x="385.67" y="162.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">git log</text>
 <text x="365.67" y="198.00" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">e4d07b2</text>
 <text x="444.52" y="198.00" fill="#79c0ff" font-family="JB" font-size="13" font-weight="450" text-anchor="start" xml:space="preserve">(HEAD)</text>
 <text x="511.30" y="198.00" fill="#ffa657" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">wip:</text>
-<text x="565.33" y="198.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">full-stack + AI</text>
+<text x="565.33" y="198.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">all-stack&#x27;s + AI</text>
 <text x="365.67" y="232.00" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">8c2b91a</text>
 <text x="511.30" y="232.00" fill="#7ee787" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">feat:</text>
 <text x="565.33" y="232.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">joined corporate role (2025)</text>
 <text x="365.67" y="266.00" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">a3f1c2e</text>
 <text x="511.30" y="266.00" fill="#7ee787" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">feat:</text>
 <text x="565.33" y="266.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">started building software (2023)</text>
-<text x="600.00" y="332.00" fill="#6e7681" font-family="JB" font-size="12.5" font-weight="450" text-anchor="middle" xml:space="preserve">TypeScript  ·  React  ·  Node.js  ·  Python  ·  PostgreSQL  ·  Docker  ·  AWS</text>
+<text x="600.00" y="332.00" fill="#6e7681" font-family="JB" font-size="12.5" font-weight="450" text-anchor="middle" xml:space="preserve">Web Stack  ·  DB Stack  ·  Mobile Stack  ·  AI Stack</text>
 </svg>

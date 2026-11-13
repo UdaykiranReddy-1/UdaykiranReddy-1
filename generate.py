@@ -59,14 +59,14 @@ CONTENT_X = CARD_X + PAD_X
 FULL_NAME = "Uday Kiran Reddy"
 TAGLINE = "I code and decode stuff"
 LOCATION = "Bangalore, India"
-ROLE = "Full-Stack Developer"
-# Curated, short subset of the skillicons listed in his current README
-STACK = ["TypeScript", "React", "Node.js", "Python", "PostgreSQL", "Docker", "AWS"]
+ROLE = "Any-Stack Developer"
+STACK = ["Web Stack", "DB Stack", "Mobile Stack", "AI Stack"]
 NOW = "Side projects"
 LEARNING = "Advanced System Design & Cloud"
 GITHUB = "UdaykiranReddy-1"
 EMAIL = "uday410ry@gmail.com"
 LINKEDIN_LABEL = "LinkedIn"
+MEDIUM_LABEL = "Medium"
 
 
 def b64(path: Path) -> str:
@@ -623,7 +623,7 @@ def build_commit_log(include_decoder_header: bool = False) -> tuple[str, int]:
     hash_size = 14
     msg_size = 14
     commits = [
-        ("e4d07b2", "HEAD", "wip:", "full-stack + AI", ORANGE),
+        ("e4d07b2", "HEAD", "wip:", "all-stack's + AI", ORANGE),
         ("8c2b91a", "", "feat:", "joined corporate role (2025)", GREEN_SOFT),
         ("a3f1c2e", "", "feat:", "started building software (2023)", GREEN_SOFT),
     ]
@@ -666,8 +666,8 @@ def build_combo() -> tuple[str, int]:
     return build_commit_log(include_decoder_header=True)
 
 
-GITHUB_URL = "https://github.com/UdaykiranReddy-1"
 LINKEDIN_URL = "https://www.linkedin.com/in/uday-kiran-reddy-n-7845b0280/"
+MEDIUM_URL = "https://medium.com/@uday410ry"
 MAIL_URL = f"mailto:{EMAIL}"
 LINK_GAP_BEFORE = 44
 # Former caption row reserved 24px before the scramble strip; name keeps that inset.
@@ -796,7 +796,7 @@ def build_combo_profile_inner() -> tuple[str, float]:
     hash_size = 14
     msg_size = 14
     commits = [
-        ("e4d07b2", "HEAD", "wip:", "full-stack + AI", ORANGE),
+        ("e4d07b2", "HEAD", "wip:", "all-stack's + AI", ORANGE),
         ("8c2b91a", "", "feat:", "joined corporate role (2025)", GREEN_SOFT),
         ("a3f1c2e", "", "feat:", "started building software (2023)", GREEN_SOFT),
     ]
@@ -890,11 +890,11 @@ def build_link_sep_svg() -> tuple[str, int, int]:
 def write_readme_md(dest: Path) -> None:
     # GitHub strips <style> and inline CSS; each <a> must contain only a single <img>.
     link_row = (
-        f'<a href="{GITHUB_URL}"><img src="assets/link-github.svg" height="24" alt="" /></a>'
-        f'<img src="assets/link-sep.svg" height="24" alt="" />'
         f'<a href="{LINKEDIN_URL}"><img src="assets/link-linkedin.svg" height="24" alt="" /></a>'
         f'<img src="assets/link-sep.svg" height="24" alt="" />'
         f'<a href="{MAIL_URL}"><img src="assets/link-email.svg" height="24" alt="" /></a>'
+        f'<img src="assets/link-sep.svg" height="24" alt="" />'
+        f'<a href="{MEDIUM_URL}"><img src="assets/link-medium.svg" height="24" alt="" /></a>'
     )
     dest.write_text(
         "\n".join(
@@ -919,9 +919,9 @@ def build_profile_assets(out_dir: Path | None = None) -> None:
     (out_dir / "profile-main.svg").write_text(main_svg, encoding="utf-8")
 
     for name, icon_d, label in (
-        ("link-github.svg", ICON_GITHUB, "GitHub"),
         ("link-linkedin.svg", ICON_LINKEDIN, "LinkedIn"),
         ("link-email.svg", ICON_MAIL, EMAIL),
+        ("link-medium.svg", ICON_MD, MEDIUM_LABEL),
     ):
         svg, _, _ = build_link_item_svg(icon_d, label)
         (out_dir / name).write_text(svg, encoding="utf-8")
@@ -1040,6 +1040,31 @@ def _name_centroid_x(im_path: Path, band_px: int = 100) -> float | None:
     return float(cols[0] + cols[-1]) / 2.0
 
 
+def render_readme_settled_puppeteer(repo_root: Path, dest: Path) -> None:
+    """Full README at 3s via puppeteer (SMIL on profile <img>)."""
+    import os
+    import subprocess
+
+    script = repo_root / "scripts" / "capture-readme-settled.mjs"
+    env = {
+        **os.environ,
+        "ARTIFACT_DIR": str(dest.parent),
+        "README_VERIFY_PATH": str(dest),
+        "README_SETTLE_MS": "3000",
+    }
+    r = subprocess.run(
+        ["node", str(script)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"readme puppeteer failed:\n{r.stdout}\n{r.stderr}")
+    print(r.stdout.strip())
+
+
 def verify_profile_name_animation(repo_root: Path) -> None:
     """SMIL via <img> in real Chrome (puppeteer-core) + real-time waits."""
     import os
@@ -1066,7 +1091,11 @@ def verify_profile_name_animation(repo_root: Path) -> None:
             timeout=120,
         )
 
-    env = {**os.environ, "ARTIFACT_DIR": str(artifact_dir)}
+    env = {
+        **os.environ,
+        "ARTIFACT_DIR": str(artifact_dir),
+        "PROFILE_SMIL_DELAYS": os.environ.get("PROFILE_SMIL_DELAYS", "100,400,3000"),
+    }
     r = subprocess.run(
         ["node", str(script)],
         cwd=repo_root,
@@ -1079,7 +1108,7 @@ def verify_profile_name_animation(repo_root: Path) -> None:
         raise RuntimeError(f"puppeteer verify failed:\n{r.stdout}\n{r.stderr}")
     print(r.stdout.strip())
 
-    delays = [100, 250, 400, 600, 900, 3000]
+    delays = [int(x) for x in env["PROFILE_SMIL_DELAYS"].split(",")]
     centroids: dict[int, float] = {}
     for ms in delays:
         p = artifact_dir / f"profile-name-img-{ms}ms.png"
@@ -1265,7 +1294,7 @@ def main():
         repo = Path(__file__).resolve().parent
         artifact = Path("/opt/cursor/artifacts/readme-profile-verify.png")
         artifact.parent.mkdir(parents=True, exist_ok=True)
-        render_readme_settled_preview(repo, artifact)
+        render_readme_settled_puppeteer(repo, artifact)
         verify_profile_name_animation(repo)
         ref = Path(
             "/home/ubuntu/.cursor/projects/agent-repos-UdaykiranReddy-1/assets/04-combo.png"

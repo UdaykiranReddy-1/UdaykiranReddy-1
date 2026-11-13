@@ -12,7 +12,9 @@ const chromePath = process.env.CHROME_PATH || "/opt/google/chrome/chrome";
 const svgPath = path.join(repoRoot, "assets", "profile-main.svg");
 const artifactDir = process.env.ARTIFACT_DIR || "/opt/cursor/artifacts";
 const width = 992;
-const delays = [100, 250, 400, 600, 900, 3000];
+const delays = process.env.PROFILE_SMIL_DELAYS
+  ? process.env.PROFILE_SMIL_DELAYS.split(",").map((s) => Number(s.trim()))
+  : [100, 250, 400, 600, 900, 3000];
 
 fs.mkdirSync(artifactDir, { recursive: true });
 
