@@ -26,6 +26,6 @@ text { font-synthesis: none; }
   </filter>
 </defs>
 
-<g transform="translate(0.00,7.00) scale(0.9375)"><path fill="#58a6ff" d="M1.75 3A1.75 1.75 0 000 4.75v6.5C0 12.216.784 13 1.75 13h12.5A1.75 1.75 0 0016 11.25v-6.5A1.75 1.75 0 0014.25 3H1.75zM1.5 4.75a.25.25 0 01.25-.25h12.5a.25.25 0 01.25.25v.43L8.22 8.92a.75.75 0 01-.44 0L1.5 5.18v-.43zm0 1.73l5.86 3.73a2.25 2.25 0 002.28 0l5.86-3.73v4.77a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25V6.48z"/></g>
+<g transform="translate(1.25,8.25) scale(0.5208)"><path fill="#58a6ff" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75 1.75-1.75z"/><path fill="#0d1117" d="M5.25 9.75 12 14.5 18.75 9.75z"/><path fill="none" stroke="#58a6ff" stroke-width="1.35" stroke-linejoin="round" d="M5.25 9.75 12 14.5 18.75 9.75"/></g>
 <text x="22.00" y="18.00" fill="#58a6ff" font-family="JB" font-size="13.5" font-weight="450" text-anchor="start" xml:space="preserve">uday410ry@gmail.com</text>
 </svg>

@@ -190,26 +190,58 @@ ICON_LINKEDIN = (
     "-3.22-2.73-3.22-1.26 0-1.82.7-2.14 1.18V6.2H6.64c.03.66 0 7.3 0 7.3h2.3V9.54"
     "c0-.21.02-.42.08-.57.17-.42.56-.86 1.22-.86.86 0 1.2.66 1.2 1.62v3.77h2.36z"
 )
-ICON_MAIL = (
-    "M1.75 3A1.75 1.75 0 000 4.75v6.5C0 12.216.784 13 1.75 13h12.5A1.75"
-    " 1.75 0 0016 11.25v-6.5A1.75 1.75 0 0014.25 3H1.75zM1.5 4.75a.25.25"
-    " 0 01.25-.25h12.5a.25.25 0 01.25.25v.43L8.22 8.92a.75.75 0 01-.44 0"
-    "L1.5 5.18v-.43zm0 1.73l5.86 3.73a2.25 2.25 0 002.28 0l5.86-3.73v4.77"
-    "a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25V6.48z"
-)
-ICON_MD = (
-    "M14.85 3H1.15C.52 3 0 3.52 0 4.15v7.69C0 12.48.52 13 1.15 13h13.69c.64"
-    " 0 1.15-.52 1.15-1.16V4.15C16 3.52 15.48 3 14.85 3zM9 11H7.5L5.5 8.5"
-    " 3.5 11H2V5h1.5v4L5.5 6.5 7.5 9V5H9v6zm4.5-1.5h-1.25V5H11v4.5H9.75L12 11.25"
-    " 14.25 9.5z"
-)
+ICON_MAIL = ""  # rendered via icon_envelope()
 
 
-def icon(d: str, x: float, y: float, size: float = 16, fill: str = LINK) -> str:
-    s = size / 16
+def icon(
+    d: str,
+    x: float,
+    y: float,
+    size: float = 16,
+    fill: str = LINK,
+    *,
+    view: float = 16,
+    pad: float = 0,
+) -> str:
+    inner = max(size - 2 * pad, 1)
+    s = inner / view
     return (
-        f'<g transform="translate({x:.2f},{y:.2f}) scale({s:.4f})">'
+        f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
         f'<path fill="{fill}" d="{d}"/></g>'
+    )
+
+
+def icon_envelope(x: float, y: float, size: float = 16, fill: str = LINK) -> str:
+    """Envelope with flap; 24×24 art inset so edges are not clipped."""
+    pad = 1.25
+    inner = size - 2 * pad
+    s = inner / 24.0
+    return (
+        f'<g transform="translate({x + pad:.2f},{y + pad:.2f}) scale({s:.4f})">'
+        f'<path fill="{fill}" d="M5.25 8.25h13.5c.96 0 1.75.79 1.75 1.75v7.75c0 .96-.79'
+        f" 1.75-1.75 1.75H5.25c-.96 0-1.75-.79-1.75-1.75v-7.75c0-.96.79-1.75"
+        f' 1.75-1.75z"/>'
+        f'<path fill="{PAGE}" d="M5.25 9.75 12 14.5 18.75 9.75z"/>'
+        f'<path fill="none" stroke="{fill}" stroke-width="1.35" stroke-linejoin="round" '
+        f'd="M5.25 9.75 12 14.5 18.75 9.75"/>'
+        f"</g>"
+    )
+
+
+def icon_medium_ellipsis(x: float, y: float, size: float = 16, fill: str = LINK) -> str:
+    """Medium brand mark: circle + two ellipses (Collins ellipsis symbol)."""
+    pad = 1.0
+    inner = size - 2 * pad
+    s = inner / 1770.0  # fit full mark width inside icon box (no horizontal clip)
+    art_h = 1000.0 * s
+    tx = x + pad
+    ty = y + pad + max(0.0, (inner - art_h) / 2)
+    return (
+        f'<g transform="translate({tx:.4f},{ty:.4f}) scale({s:.6f})">'
+        f'<circle cx="500" cy="500" r="500" fill="{fill}"/>'
+        f'<ellipse cx="1296" cy="501" rx="250" ry="475" fill="{fill}"/>'
+        f'<ellipse cx="1682" cy="502" rx="88" ry="424" fill="{fill}"/>'
+        f"</g>"
     )
 
 
@@ -303,7 +335,7 @@ def readme_chrome(inner: str, content_h: float, bottom_extra: float = 0) -> tupl
                  a6,6 0 0 1 6,-6 z" fill="#0d1117"/>
         """,
         line(CARD_X, CARD_Y + HEADER_H, CARD_X + CARD_W, CARD_Y + HEADER_H, CARD_BORDER, 1),
-        icon(ICON_MD, CARD_X + 18, CARD_Y + 16, 16, HEADER_MUTED),
+        icon_medium_ellipsis(CARD_X + 18, CARD_Y + 16, 16, HEADER_MUTED),
         text(CARD_X + 40, CARD_Y + 31, "README.md", 13, HEADER_FG, 500, family="JB"),
         # inner content translated
         f'<g transform="translate(0,{CARD_Y + HEADER_H + top_pad})">',
@@ -852,7 +884,12 @@ def build_profile_main_svg() -> tuple[str, int]:
     return svg, h
 
 
-def build_link_item_svg(icon_d: str, label: str) -> tuple[str, int, int]:
+def build_link_item_svg(
+    icon_d: str,
+    label: str,
+    *,
+    icon_markup: str | None = None,
+) -> tuple[str, int, int]:
     size = 13.5
     gap_icon = 7
     icon_s = 15
@@ -860,11 +897,16 @@ def build_link_item_svg(icon_d: str, label: str) -> tuple[str, int, int]:
     w = int(icon_s + gap_icon + text_w + 1)
     h = 24
     y_text = 18.0
+    if icon_markup is None:
+        if label == EMAIL:
+            icon_markup = icon_envelope(0, y_text - 11, icon_s, LINK)
+        else:
+            icon_markup = icon(icon_d, 0, y_text - 11, icon_s, LINK)
     svg = "\n".join(
         [
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">',
             defs(),
-            icon(icon_d, 0, y_text - 11, icon_s, LINK),
+            icon_markup,
             text(icon_s + gap_icon, y_text, label, size, LINK, 450, family="JB"),
             "</svg>",
         ]
@@ -918,12 +960,18 @@ def build_profile_assets(out_dir: Path | None = None) -> None:
     main_svg, _ = build_profile_main_svg()
     (out_dir / "profile-main.svg").write_text(main_svg, encoding="utf-8")
 
-    for name, icon_d, label in (
-        ("link-linkedin.svg", ICON_LINKEDIN, "LinkedIn"),
-        ("link-email.svg", ICON_MAIL, EMAIL),
-        ("link-medium.svg", ICON_MD, MEDIUM_LABEL),
-    ):
-        svg, _, _ = build_link_item_svg(icon_d, label)
+    link_items = (
+        ("link-linkedin.svg", ICON_LINKEDIN, LINKEDIN_LABEL, None),
+        ("link-email.svg", ICON_MAIL, EMAIL, None),
+        (
+            "link-medium.svg",
+            "",
+            MEDIUM_LABEL,
+            icon_medium_ellipsis(0, 7.0, 15, LINK),
+        ),
+    )
+    for name, icon_d, label, icon_markup in link_items:
+        svg, _, _ = build_link_item_svg(icon_d, label, icon_markup=icon_markup)
         (out_dir / name).write_text(svg, encoding="utf-8")
 
     sep, _, _ = build_link_sep_svg()
@@ -1038,6 +1086,33 @@ def _name_centroid_x(im_path: Path, band_px: int = 100) -> float | None:
         return None
     cols = np.where(mask.any(axis=0))[0]
     return float(cols[0] + cols[-1]) / 2.0
+
+
+def save_link_row_zoom(readme_png: Path, dest: Path, zoom: int = 3) -> None:
+    """Crop link row from full README render and upscale for visual QA."""
+    import numpy as np
+    from PIL import Image
+
+    im = Image.open(readme_png).convert("RGB")
+    arr = np.array(im)
+    w, h = arr.shape[1], arr.shape[0]
+    # Link blue #58a6ff ≈ (88, 166, 255)
+    linkish = (arr[:, :, 2] > 200) & (arr[:, :, 1] > 120) & (arr[:, :, 0] < 120)
+    row_scores = linkish.sum(axis=1)
+    y_hit = int(np.argmax(row_scores))
+    if row_scores[y_hit] < 40:
+        y_hit = h - max(int(h * 0.08), 120)
+    pad = 28
+    y0 = max(0, y_hit - pad)
+    y1 = min(h, y_hit + pad)
+    crop = im.crop((int(w * 0.12), y0, int(w * 0.88), y1))
+    if zoom != 1:
+        crop = crop.resize(
+            (crop.size[0] * zoom, crop.size[1] * zoom), Image.Resampling.LANCZOS
+        )
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    crop.save(dest, "PNG", optimize=True)
+    print(f"link row zoom {zoom}x: {dest} {crop.size}")
 
 
 def render_readme_settled_puppeteer(repo_root: Path, dest: Path) -> None:
@@ -1295,6 +1370,7 @@ def main():
         artifact = Path("/opt/cursor/artifacts/readme-profile-verify.png")
         artifact.parent.mkdir(parents=True, exist_ok=True)
         render_readme_settled_puppeteer(repo, artifact)
+        save_link_row_zoom(artifact, artifact.parent / "readme-link-row-3x.png", 3)
         verify_profile_name_animation(repo)
         ref = Path(
             "/home/ubuntu/.cursor/projects/agent-repos-UdaykiranReddy-1/assets/04-combo.png"
