@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="992" height="466" viewBox="104 0 992 466">
+<svg xmlns="http://www.w3.org/2000/svg" width="992" height="466" viewBox="104 -12 992 478">
 
 <defs>
   <style type="text/css">
@@ -26,7 +26,7 @@ text { font-synthesis: none; }
   </filter>
 </defs>
 
-<rect x="104.00" y="0.00" width="992.00" height="466.00" rx="0" fill="#0d1117" />
+<rect x="104.00" y="-12.00" width="992.00" height="478.00" rx="0" fill="#0d1117" />
 <text x="600.00" y="0.00" fill="#6e7681" font-family="JB" font-size="11.5" font-weight="400" text-anchor="middle" letter-spacing="0.6" xml:space="preserve">the name unscrambles on load</text>
 <rect x="352.40" y="24.00" width="147.89" height="33.12" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.9" />
 <text x="426.35" y="45.53" fill="#6e7681" font-family="JB" font-size="11.96" font-weight="450" text-anchor="middle" opacity="0.9" xml:space="preserve">U#4y K!r@n R3d*y</text>

@@ -670,6 +670,8 @@ GITHUB_URL = "https://github.com/UdaykiranReddy-1"
 LINKEDIN_URL = "https://www.linkedin.com/in/uday-kiran-reddy-n-7845b0280/"
 MAIL_URL = f"mailto:{EMAIL}"
 LINK_GAP_BEFORE = 44
+# Ascenders for the caption sit above baseline y=0; extend viewBox upward so they are not clipped.
+PROFILE_VIEWBOX_TOP = -12
 
 
 def build_combo_profile_inner() -> tuple[str, float]:
@@ -763,12 +765,14 @@ def build_profile_main_svg() -> tuple[str, int]:
     inner, content_bottom = build_combo_profile_inner()
     h = math.ceil(content_bottom + LINK_GAP_BEFORE)
     w = CONTENT_W
+    top = PROFILE_VIEWBOX_TOP
+    vb_h = h - top
     svg = "\n".join(
         [
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
-            f'viewBox="{CONTENT_X:.0f} 0 {w} {h}">',
+            f'viewBox="{CONTENT_X:.0f} {top} {w} {vb_h}">',
             defs(),
-            rect(CONTENT_X, 0, w, h, PAGE),
+            rect(CONTENT_X, top, w, vb_h, PAGE),
             inner,
             "</svg>",
         ]
@@ -812,19 +816,29 @@ def build_link_sep_svg() -> tuple[str, int, int]:
 
 
 def write_readme_md(dest: Path) -> None:
+    link_img = "vertical-align:middle;border:0;display:inline-block;"
+    link_a = "text-decoration:none!important;border:0!important;display:inline-block;box-shadow:none!important;"
     link_row = (
-        '<span style="font-size:0;line-height:0;white-space:nowrap;">'
-        f'<a href="{GITHUB_URL}"><img src="assets/link-github.svg" height="24" alt="GitHub" style="vertical-align:middle;border:0;" /></a>'
-        f'<img src="assets/link-sep.svg" height="24" alt="" style="vertical-align:middle;border:0;" />'
-        f'<a href="{LINKEDIN_URL}"><img src="assets/link-linkedin.svg" height="24" alt="LinkedIn" style="vertical-align:middle;border:0;" /></a>'
-        f'<img src="assets/link-sep.svg" height="24" alt="" style="vertical-align:middle;border:0;" />'
-        f'<a href="{MAIL_URL}"><img src="assets/link-email.svg" height="24" alt="{EMAIL}" style="vertical-align:middle;border:0;" /></a>'
+        '<span class="profile-links" style="font-size:0;line-height:0;white-space:nowrap;">'
+        f'<a class="profile-link" href="{GITHUB_URL}" style="{link_a}">'
+        f'<img src="assets/link-github.svg" height="24" alt="GitHub" style="{link_img}" /></a>'
+        f'<img src="assets/link-sep.svg" height="24" alt="" style="{link_img}" />'
+        f'<a class="profile-link" href="{LINKEDIN_URL}" style="{link_a}">'
+        f'<img src="assets/link-linkedin.svg" height="24" alt="LinkedIn" style="{link_img}" /></a>'
+        f'<img src="assets/link-sep.svg" height="24" alt="" style="{link_img}" />'
+        f'<a class="profile-link" href="{MAIL_URL}" style="{link_a}">'
+        f'<img src="assets/link-email.svg" height="24" alt="{EMAIL}" style="{link_img}" /></a>'
         "</span>"
+    )
+    no_underline_css = (
+        "<style>.profile-links a,.profile-links a:hover"
+        "{text-decoration:none!important;border:0!important;box-shadow:none!important;}</style>"
     )
     dest.write_text(
         "\n".join(
             [
                 '<div align="center">',
+                no_underline_css,
                 f'<img src="assets/profile-main.svg" width="{CONTENT_W}" alt="" style="display:block;margin:0 auto;border:0;" />',
                 link_row,
                 "</div>",
@@ -887,6 +901,14 @@ def render_readme_preview(
     box-sizing: border-box;
   }}
   img {{ border: none; vertical-align: middle; }}
+  /* Match github.com markdown link defaults */
+  .markdown-body a {{ color: #58a6ff; text-decoration: underline; }}
+  .profile-links a,
+  .profile-links a:hover {{
+    text-decoration: none !important;
+    border: 0;
+    box-shadow: none;
+  }}
 </style>
 </head>
 <body>
@@ -915,7 +937,7 @@ def render_readme_preview(
         "--virtual-time-budget=15000",
         "--run-all-compositor-stages-before-draw",
         f"--screenshot={png_tmp}",
-        f"file://{html_path}",
+        html_path.resolve().as_uri(),
     ]
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(repo_root), timeout=90)
     if r.returncode != 0 or not png_tmp.exists():
