@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="992" height="466" viewBox="104 -12 992 478">
+<svg xmlns="http://www.w3.org/2000/svg" width="992" height="376" viewBox="104 -8 992 384">
 
 <defs>
   <style type="text/css">
@@ -26,34 +26,22 @@ text { font-synthesis: none; }
   </filter>
 </defs>
 
-<rect x="104.00" y="-12.00" width="992.00" height="478.00" rx="0" fill="#0d1117" />
-<text x="600.00" y="0.00" fill="#6e7681" font-family="JB" font-size="11.5" font-weight="400" text-anchor="middle" letter-spacing="0.6" xml:space="preserve">the name unscrambles on load</text>
-<rect x="352.40" y="24.00" width="147.89" height="33.12" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.9" />
-<text x="426.35" y="45.53" fill="#6e7681" font-family="JB" font-size="11.96" font-weight="450" text-anchor="middle" opacity="0.9" xml:space="preserve">U#4y K!r@n R3d*y</text>
-<text x="513.17" y="45.53" fill="#484f58" font-family="JB" font-size="12.88" font-weight="400" text-anchor="middle" xml:space="preserve">→</text>
-<rect x="526.05" y="24.00" width="147.89" height="33.12" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.95" />
-<text x="600.00" y="45.53" fill="#8b949e" font-family="JB" font-size="11.96" font-weight="450" text-anchor="middle" opacity="0.95" xml:space="preserve">Ud?y Ki?an Re??y</text>
-<text x="686.82" y="45.53" fill="#484f58" font-family="JB" font-size="12.88" font-weight="400" text-anchor="middle" xml:space="preserve">→</text>
-<rect x="699.70" y="24.00" width="147.89" height="33.12" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="1.0" />
-<text x="773.65" y="45.53" fill="#e6edf3" font-family="JB" font-size="11.96" font-weight="450" text-anchor="middle" opacity="1.0" xml:space="preserve">Uday Kiran Reddy</text>
-<text x="426.35" y="71.84" fill="#484f58" font-family="JB" font-size="9.200000000000001" font-weight="400" text-anchor="middle" letter-spacing="0.4" xml:space="preserve">scrambled</text>
-<text x="600.00" y="71.84" fill="#484f58" font-family="JB" font-size="9.200000000000001" font-weight="400" text-anchor="middle" letter-spacing="0.4" xml:space="preserve">settling</text>
-<text x="773.65" y="71.84" fill="#484f58" font-family="JB" font-size="9.200000000000001" font-weight="400" text-anchor="middle" letter-spacing="0.4" xml:space="preserve">final</text>
-<text x="600.00" y="113.68" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve">Uday Kiran Reddy</text>
-<text x="600.00" y="149.68" fill="#8b949e" font-family="JB" font-size="17" font-weight="400" text-anchor="middle" font-style="italic" xml:space="preserve">I code and decode stuff</text>
-<text x="600.00" y="175.68" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Full-Stack Developer  ·  Bangalore, India</text>
-<line x1="564.00" y1="211.68" x2="636.00" y2="211.68" stroke="#30363d" stroke-width="1" stroke-linecap="round" />
-<text x="365.67" y="251.68" fill="#3fb950" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">$</text>
-<text x="385.67" y="251.68" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">git log</text>
-<text x="365.67" y="287.68" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">e4d07b2</text>
-<text x="444.52" y="287.68" fill="#79c0ff" font-family="JB" font-size="13" font-weight="450" text-anchor="start" xml:space="preserve">(HEAD)</text>
-<text x="511.30" y="287.68" fill="#ffa657" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">wip:</text>
-<text x="565.33" y="287.68" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">full-stack + AI</text>
-<text x="365.67" y="321.68" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">8c2b91a</text>
-<text x="511.30" y="321.68" fill="#7ee787" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">feat:</text>
-<text x="565.33" y="321.68" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">joined corporate role (2025)</text>
-<text x="365.67" y="355.68" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">a3f1c2e</text>
-<text x="511.30" y="355.68" fill="#7ee787" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">feat:</text>
-<text x="565.33" y="355.68" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">started building software (2023)</text>
-<text x="600.00" y="421.68" fill="#6e7681" font-family="JB" font-size="12.5" font-weight="450" text-anchor="middle" xml:space="preserve">TypeScript  ·  React  ·  Node.js  ·  Python  ·  PostgreSQL  ·  Docker  ·  AWS</text>
+<rect x="104.00" y="-8.00" width="992.00" height="384.00" rx="0" fill="#0d1117" />
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve">Uday Kiran Reddy</text>
+<text x="600.00" y="60.00" fill="#8b949e" font-family="JB" font-size="17" font-weight="400" text-anchor="middle" font-style="italic" xml:space="preserve">I code and decode stuff</text>
+<text x="600.00" y="86.00" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Full-Stack Developer  ·  Bangalore, India</text>
+<line x1="564.00" y1="122.00" x2="636.00" y2="122.00" stroke="#30363d" stroke-width="1" stroke-linecap="round" />
+<text x="365.67" y="162.00" fill="#3fb950" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">$</text>
+<text x="385.67" y="162.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">git log</text>
+<text x="365.67" y="198.00" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">e4d07b2</text>
+<text x="444.52" y="198.00" fill="#79c0ff" font-family="JB" font-size="13" font-weight="450" text-anchor="start" xml:space="preserve">(HEAD)</text>
+<text x="511.30" y="198.00" fill="#ffa657" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">wip:</text>
+<text x="565.33" y="198.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">full-stack + AI</text>
+<text x="365.67" y="232.00" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">8c2b91a</text>
+<text x="511.30" y="232.00" fill="#7ee787" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">feat:</text>
+<text x="565.33" y="232.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">joined corporate role (2025)</text>
+<text x="365.67" y="266.00" fill="#e3b341" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">a3f1c2e</text>
+<text x="511.30" y="266.00" fill="#7ee787" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">feat:</text>
+<text x="565.33" y="266.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">started building software (2023)</text>
+<text x="600.00" y="332.00" fill="#6e7681" font-family="JB" font-size="12.5" font-weight="450" text-anchor="middle" xml:space="preserve">TypeScript  ·  React  ·  Node.js  ·  Python  ·  PostgreSQL  ·  Docker  ·  AWS</text>
 </svg>
