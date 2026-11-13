@@ -344,7 +344,7 @@ def link_row(cx: float, y: float) -> tuple[str, float]:
 
 
 def stack_row(cx: float, y: float, size: float = 13, weight: int = 450, fill: str = MUTED) -> str:
-    sep = "\u00a0\u00a0·\u00a0\u00a0"
+    sep = f"\u00a0\u00a0{MIDDOT}\u00a0\u00a0"
     label = sep.join(STACK)
     return text(cx, y, label, size, fill, weight, family="JB", anchor="middle")
 
@@ -673,7 +673,8 @@ LINK_GAP_BEFORE = 44
 # Former caption row reserved 24px before the scramble strip; name keeps that inset.
 PROFILE_NAME_TOP = 24
 # Large name ascenders extend above the baseline; extend viewBox upward slightly.
-PROFILE_VIEWBOX_TOP = -8
+PROFILE_VIEWBOX_TOP = -24
+MIDDOT = "\u00b7"
 NAME_SIZE = 40
 NAME_WEIGHT = 600
 NAME_LETTER_SPACING = 0.5
@@ -701,37 +702,75 @@ def name_unscramble_overlay_frames() -> list[str]:
     return frames
 
 
+def name_unscramble_end_ms(overlay_count: int | None = None) -> int:
+    n = overlay_count if overlay_count is not None else len(name_unscramble_overlay_frames())
+    return NAME_ANIM_START_MS + n * NAME_ANIM_STEP_MS + 60
+
+
 def name_unscramble_svg(cx: float, y: float) -> str:
-    """SMIL name decode: base text is final name; overlays flash scrambled states once."""
+    """SMIL decode: one visible frame at a time; settled name default for non-SMIL."""
     overlays = name_unscramble_overlay_frames()
-    step = NAME_ANIM_STEP_MS
-    bits = [
-        f'<g id="profile-name-unscramble">',
-        text(
-            cx,
-            y,
-            FULL_NAME,
-            NAME_SIZE,
-            NAME,
-            NAME_WEIGHT,
-            family="JB",
-            anchor="middle",
-            letter_spacing=NAME_LETTER_SPACING,
-        ),
-    ]
-    for i, label in enumerate(overlays):
-        begin_s = (NAME_ANIM_START_MS + i * step) / 1000.0
-        dur_s = step / 1000.0
+    step_ms = NAME_ANIM_STEP_MS
+    start_ms = NAME_ANIM_START_MS
+    end_ms = name_unscramble_end_ms(len(overlays))
+    n = len(overlays)
+
+    def ms(s: int) -> str:
+        return f"{s / 1000.0:.3f}s"
+
+    name_attrs = (
+        f'font-family="JB" font-size="{NAME_SIZE}" font-weight="{NAME_WEIGHT}" '
+        f'text-anchor="middle" letter-spacing="{NAME_LETTER_SPACING}" xml:space="preserve"'
+    )
+    bits = ['<g id="profile-name-unscramble">']
+    # Base: default visible for <img> / static; hidden from t=0 through scramble for SMIL.
+    bits.append(
+        f'<text id="profile-name-settled" x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" {name_attrs}>'
+        f"{esc(FULL_NAME)}"
+        f'<set attributeName="opacity" to="0" begin="0s" fill="freeze"/>'
+        f'<set attributeName="display" to="none" begin="0s" fill="freeze"/>'
+        f'<set attributeName="opacity" to="1" begin="{ms(end_ms)}" fill="freeze"/>'
+        f'<set attributeName="display" to="inline" begin="{ms(end_ms)}" fill="freeze"/>'
+        f"</text>"
+    )
+
+    bits.append(
+        '<g id="profile-name-scrambles" '
+        'requiredFeatures="http://www.w3.org/TR/SVG11/feature#Animation">'
+    )
+    bits.append(
+        f'<text id="profile-name-scramble" x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" {name_attrs} '
+        f'display="none" visibility="hidden" opacity="0">'
+    )
+    for attr, on, off in (
+        ("display", "inline", "none"),
+        ("visibility", "visible", "hidden"),
+        ("opacity", "1", "0"),
+    ):
         bits.append(
-            f'<text x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" font-family="JB" '
-            f'font-size="{NAME_SIZE}" font-weight="{NAME_WEIGHT}" text-anchor="middle" '
-            f'letter-spacing="{NAME_LETTER_SPACING}" opacity="0" xml:space="preserve">'
-            f"{esc(label)}"
-            f'<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" '
-            f'dur="{dur_s:.3f}s" begin="{begin_s:.3f}s" fill="freeze"/>'
-            f"</text>"
+            f'<set attributeName="{attr}" to="{on}" begin="{ms(start_ms)}" fill="freeze"/>'
         )
-    bits.append("</g>")
+        bits.append(
+            f'<set attributeName="{attr}" to="{off}" begin="{ms(end_ms)}" fill="freeze"/>'
+        )
+    bits.append(
+        f'<set attributeName="x" to="-10000" begin="{ms(end_ms)}" fill="freeze"/>'
+    )
+    for i, label in enumerate(overlays):
+        t0 = start_ms + i * step_ms
+        t1 = t0 + step_ms
+        bits.append(
+            f'<tspan id="profile-name-frame-{i}" display="none" visibility="hidden">'
+            f"{esc(label)}"
+            f'<set attributeName="display" to="inline" begin="{ms(t0)}" fill="freeze"/>'
+            f'<set attributeName="visibility" to="visible" begin="{ms(t0)}" fill="freeze"/>'
+            f'<set attributeName="display" to="none" begin="{ms(t1)}" fill="freeze"/>'
+            f'<set attributeName="visibility" to="hidden" begin="{ms(t1)}" fill="freeze"/>'
+            f'<set attributeName="display" to="none" begin="{ms(end_ms)}" fill="freeze"/>'
+            f'<set attributeName="visibility" to="hidden" begin="{ms(end_ms)}" fill="freeze"/>'
+            f"</tspan>"
+        )
+    bits.append("</text></g></g>")
     return "\n".join(bits)
 
 
@@ -748,7 +787,16 @@ def build_combo_profile_inner() -> tuple[str, float]:
     )
     y += 26
     parts.append(
-        text(cx, y, f"{ROLE}  ·  {LOCATION}", 13, DIM, 400, family="JB", anchor="middle")
+        text(
+            cx,
+            y,
+            f"{ROLE}\u00a0\u00a0{MIDDOT}\u00a0\u00a0{LOCATION}",
+            13,
+            DIM,
+            400,
+            family="JB",
+            anchor="middle",
+        )
     )
     y += 36
     rule_w = 72
@@ -801,8 +849,10 @@ def build_profile_main_svg() -> tuple[str, int]:
     vb_h = h - top
     svg = "\n".join(
         [
-            f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
-            f'viewBox="{CONTENT_X:.0f} {top} {w} {vb_h}">',
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{w}" height="{h}" viewBox="{CONTENT_X:.0f} {top} {w} {vb_h}">',
             defs(),
             rect(CONTENT_X, top, w, vb_h, PAGE),
             inner,
@@ -931,8 +981,63 @@ def _chrome_screenshot_html(
     png_tmp.unlink(missing_ok=True)
 
 
+def render_profile_main_static_png(svg_path: Path, dest: Path, height: int, scale: int = 2) -> None:
+    """Rasterize without SMIL (matches GitHub <img> / non-animated viewers)."""
+    import cairosvg
+
+    w = CONTENT_W * scale
+    h = height * scale
+    tmp = dest.with_suffix(".cairo.png")
+    cairosvg.svg2png(
+        url=str(svg_path),
+        write_to=str(tmp),
+        output_width=w,
+        output_height=h,
+    )
+    from PIL import Image
+
+    im = Image.open(tmp).convert("RGB")
+    im.save(dest, "PNG", optimize=True)
+    tmp.unlink(missing_ok=True)
+
+
+def render_readme_settled_preview(
+    repo_root: Path, dest: Path, page_w: int = 1012, scale: int = 2
+) -> None:
+    """Full README preview with static main SVG raster (no SMIL on <img>)."""
+    import base64
+
+    svg_path = repo_root / "assets" / "profile-main.svg"
+    _, h = build_profile_main_svg()
+    static_png = dest.parent / "profile-main-static-raster.png"
+    render_profile_main_static_png(svg_path, static_png, h, scale)
+    b64 = base64.b64encode(static_png.read_bytes()).decode("ascii")
+    data_uri = f"data:image/png;base64,{b64}"
+    readme = repo_root / "README.md"
+    body = readme.read_text(encoding="utf-8").replace(
+        'src="assets/profile-main.svg"',
+        f'src="{data_uri}"',
+        1,
+    )
+    html_path = repo_root / "_readme_settled_preview.html"
+    html_path.write_text(_inline_svg_html(body, page_w), encoding="utf-8")
+    _chrome_screenshot_html(html_path, dest, page_w, 620, scale, 0)
+    html_path.unlink(missing_ok=True)
+    static_png.unlink(missing_ok=True)
+    print(f"readme preview (settled static): {dest} {dest.stat().st_size}")
+
+
+def _inline_svg_html(body: str, page_w: int) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<style>html,body{{margin:0;padding:0;background:{PAGE};width:{page_w}px}}</style>
+</head>
+<body>{body}</body></html>"""
+
+
 def verify_profile_name_animation(repo_root: Path) -> None:
-    """SMIL mid-frames via <object>; settled via <img> (non-SMIL default)."""
+    """SMIL mid-frames (Chrome + object); settled still frame via Cairo (GitHub <img>)."""
     from PIL import Image, ImageChops
     import numpy as np
 
@@ -945,39 +1050,42 @@ def verify_profile_name_animation(repo_root: Path) -> None:
     _svg, h = build_profile_main_svg()
     w = CONTENT_W
     scale = 2
+    page_h = h - PROFILE_VIEWBOX_TOP
 
-    # Settled: <img> ignores SMIL → must match static final name only.
-    img_html = repo_root / "_name_settled_img.html"
-    img_html.write_text(
-        f"""<!DOCTYPE html><html><head><style>html,body{{margin:0;background:{PAGE}}}</style></head>
-<body style="width:{w}px"><img src="assets/profile-main.svg" width="{w}" alt="" /></body></html>""",
-        encoding="utf-8",
-    )
     settled_img = artifact_dir / "profile-name-settled.png"
-    _chrome_screenshot_html(img_html, settled_img, w, h + 8, scale, 0)
-    img_html.unlink(missing_ok=True)
+    render_profile_main_static_png(svg_path, settled_img, h, scale)
 
-    inline_svg = svg_path.read_text(encoding="utf-8")
+    def shot_inline(budget_ms: int, dest: Path) -> None:
+        import base64
 
-    def write_inline_anim_html(path: Path, budget_ms: int) -> None:
-        path.write_text(
-            f"""<!DOCTYPE html><html><head><style>html,body{{margin:0;background:{PAGE}}}</style></head>
-<body style="width:{w}px">{inline_svg}</body></html>""",
+        html_path = repo_root / f"_name_anim_{budget_ms}.html"
+        obj_h = h - PROFILE_VIEWBOX_TOP + 8
+        svg_b64 = base64.b64encode(svg_path.read_bytes()).decode("ascii")
+        svg_uri = f"data:image/svg+xml;base64,{svg_b64}"
+        html_path.write_text(
+            f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<style>html,body{{margin:0;padding:0;background:{PAGE};width:{w}px}}</style>
+</head>
+<body>
+<object data="{svg_uri}" type="image/svg+xml"
+ width="{w}" height="{obj_h}"></object>
+</body></html>""",
             encoding="utf-8",
         )
+        _chrome_screenshot_html(html_path, dest, w, page_h, scale, budget_ms)
+        html_path.unlink(missing_ok=True)
 
-    # Mid-animation via inlined SVG (SMIL runs; <img> does not).
-    for budget_ms, out_name in ((220, "profile-name-mid-scramble-220ms.png"), (440, "profile-name-mid-scramble-440ms.png")):
-        obj_html = repo_root / f"_name_anim_{budget_ms}.html"
-        write_inline_anim_html(obj_html, budget_ms)
-        _chrome_screenshot_html(obj_html, artifact_dir / out_name, w, h + 8, scale, budget_ms)
-        obj_html.unlink(missing_ok=True)
+    # Mid scramble windows (symbol frame ~60ms, partial decode ~350ms).
+    for budget_ms, out_name in (
+        (60, "profile-name-mid-scramble-70ms.png"),
+        (350, "profile-name-mid-scramble-350ms.png"),
+    ):
+        shot_inline(budget_ms, artifact_dir / out_name)
 
     settled_smil = artifact_dir / "profile-name-settled-smil.png"
-    obj_html = repo_root / "_name_settled_smil.html"
-    write_inline_anim_html(obj_html, 1300)
-    _chrome_screenshot_html(obj_html, settled_smil, w, h + 8, scale, 1300)
-    obj_html.unlink(missing_ok=True)
+    shot_inline(name_unscramble_end_ms() + 800, settled_smil)
 
     diff = ImageChops.difference(
         Image.open(settled_img).convert("RGB"),
@@ -985,13 +1093,14 @@ def verify_profile_name_animation(repo_root: Path) -> None:
     )
     mean = float(np.array(diff).mean())
     print(f"name settled img vs SMIL end diff mean: {mean:.4f}")
-    mid_primary = artifact_dir / "profile-name-mid-scramble.png"
-    mid_primary.unlink(missing_ok=True)
-    (artifact_dir / "profile-name-mid-scramble-220ms.png").replace(mid_primary)
 
 
 def render_readme_preview(
-    repo_root: Path, dest: Path, page_w: int = 1012, scale: int = 2
+    repo_root: Path,
+    dest: Path,
+    page_w: int = 1012,
+    scale: int = 2,
+    virtual_time_ms: int = 0,
 ) -> None:
     """Render README.md like GitHub profile (dark, ~1012px content column)."""
     from PIL import Image
@@ -1045,11 +1154,12 @@ def render_readme_preview(
         f"--force-device-scale-factor={scale}",
         f"--window-size={page_w},620",
         "--default-background-color=0d1117",
-        "--virtual-time-budget=15000",
         "--run-all-compositor-stages-before-draw",
         f"--screenshot={png_tmp}",
         html_path.resolve().as_uri(),
     ]
+    if virtual_time_ms > 0:
+        cmd.insert(-1, f"--virtual-time-budget={virtual_time_ms}")
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(repo_root), timeout=90)
     if r.returncode != 0 or not png_tmp.exists():
         raise RuntimeError(f"chrome failed: {r.returncode}\n{r.stdout}\n{r.stderr}")
@@ -1138,7 +1248,7 @@ def main():
         repo = Path(__file__).resolve().parent
         artifact = Path("/opt/cursor/artifacts/readme-profile-verify.png")
         artifact.parent.mkdir(parents=True, exist_ok=True)
-        render_readme_preview(repo, artifact)
+        render_readme_settled_preview(repo, artifact)
         verify_profile_name_animation(repo)
         ref = Path(
             "/home/ubuntu/.cursor/projects/agent-repos-UdaykiranReddy-1/assets/04-combo.png"

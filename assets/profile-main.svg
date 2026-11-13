@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="992" height="376" viewBox="104 -8 992 384">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="992" height="376" viewBox="104 -24 992 400">
 
 <defs>
   <style type="text/css">
@@ -26,20 +27,29 @@ text { font-synthesis: none; }
   </filter>
 </defs>
 
-<rect x="104.00" y="-8.00" width="992.00" height="384.00" rx="0" fill="#0d1117" />
+<rect x="104.00" y="-24.00" width="992.00" height="400.00" rx="0" fill="#0d1117" />
 <g id="profile-name-unscramble">
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve">Uday Kiran Reddy</text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">U#4y K!r@n R3d*y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.010s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Ud?y Ki?an Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.120s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Ud?y Kiran Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.230s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Ki?an Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.340s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.450s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Red*y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.560s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Re?dy<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.670s" fill="freeze"/></text>
-<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Red?y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.780s" fill="freeze"/></text>
-</g>
+<text id="profile-name-settled" x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve">Uday Kiran Reddy<set attributeName="opacity" to="0" begin="0s" fill="freeze"/><set attributeName="display" to="none" begin="0s" fill="freeze"/><set attributeName="opacity" to="1" begin="0.950s" fill="freeze"/><set attributeName="display" to="inline" begin="0.950s" fill="freeze"/></text>
+<g id="profile-name-scrambles" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Animation">
+<text id="profile-name-scramble" x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve" display="none" visibility="hidden" opacity="0">
+<set attributeName="display" to="inline" begin="0.010s" fill="freeze"/>
+<set attributeName="display" to="none" begin="0.950s" fill="freeze"/>
+<set attributeName="visibility" to="visible" begin="0.010s" fill="freeze"/>
+<set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/>
+<set attributeName="opacity" to="1" begin="0.010s" fill="freeze"/>
+<set attributeName="opacity" to="0" begin="0.950s" fill="freeze"/>
+<set attributeName="x" to="-10000" begin="0.950s" fill="freeze"/>
+<tspan id="profile-name-frame-0" display="none" visibility="hidden">U#4y K!r@n R3d*y<set attributeName="display" to="inline" begin="0.010s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.010s" fill="freeze"/><set attributeName="display" to="none" begin="0.120s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.120s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-1" display="none" visibility="hidden">Ud?y Ki?an Re??y<set attributeName="display" to="inline" begin="0.120s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.120s" fill="freeze"/><set attributeName="display" to="none" begin="0.230s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.230s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-2" display="none" visibility="hidden">Ud?y Kiran Re??y<set attributeName="display" to="inline" begin="0.230s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.230s" fill="freeze"/><set attributeName="display" to="none" begin="0.340s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.340s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-3" display="none" visibility="hidden">Uday Ki?an Re??y<set attributeName="display" to="inline" begin="0.340s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.340s" fill="freeze"/><set attributeName="display" to="none" begin="0.450s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.450s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-4" display="none" visibility="hidden">Uday Kiran Re??y<set attributeName="display" to="inline" begin="0.450s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.450s" fill="freeze"/><set attributeName="display" to="none" begin="0.560s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.560s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-5" display="none" visibility="hidden">Uday Kiran Red*y<set attributeName="display" to="inline" begin="0.560s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.560s" fill="freeze"/><set attributeName="display" to="none" begin="0.670s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.670s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-6" display="none" visibility="hidden">Uday Kiran Re?dy<set attributeName="display" to="inline" begin="0.670s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.670s" fill="freeze"/><set attributeName="display" to="none" begin="0.780s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.780s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+<tspan id="profile-name-frame-7" display="none" visibility="hidden">Uday Kiran Red?y<set attributeName="display" to="inline" begin="0.780s" fill="freeze"/><set attributeName="visibility" to="visible" begin="0.780s" fill="freeze"/><set attributeName="display" to="none" begin="0.890s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.890s" fill="freeze"/><set attributeName="display" to="none" begin="0.950s" fill="freeze"/><set attributeName="visibility" to="hidden" begin="0.950s" fill="freeze"/></tspan>
+</text></g></g>
 <text x="600.00" y="60.00" fill="#8b949e" font-family="JB" font-size="17" font-weight="400" text-anchor="middle" font-style="italic" xml:space="preserve">I code and decode stuff</text>
-<text x="600.00" y="86.00" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Full-Stack Developer  ·  Bangalore, India</text>
+<text x="600.00" y="86.00" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Full-Stack Developer  ·  Bangalore, India</text>
 <line x1="564.00" y1="122.00" x2="636.00" y2="122.00" stroke="#30363d" stroke-width="1" stroke-linecap="round" />
 <text x="365.67" y="162.00" fill="#3fb950" font-family="JB" font-size="14" font-weight="500" text-anchor="start" xml:space="preserve">$</text>
 <text x="385.67" y="162.00" fill="#e6edf3" font-family="JB" font-size="14" font-weight="400" text-anchor="start" xml:space="preserve">git log</text>
