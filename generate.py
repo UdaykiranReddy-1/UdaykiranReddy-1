@@ -674,6 +674,65 @@ LINK_GAP_BEFORE = 44
 PROFILE_NAME_TOP = 24
 # Large name ascenders extend above the baseline; extend viewBox upward slightly.
 PROFILE_VIEWBOX_TOP = -8
+NAME_SIZE = 40
+NAME_WEIGHT = 600
+NAME_LETTER_SPACING = 0.5
+NAME_ANIM_STEP_MS = 110  # 80–120ms per frame → ~1–1.2s total
+# Non-zero so <img> snapshots at t=0 keep the base name visible (no begin="0ms" flash).
+NAME_ANIM_START_MS = 10
+NAME_UNSCRAMBLE_OVERLAY_FRAMES = [
+    "U#4y K!r@n R3d*y",
+    "Ud?y Ki?an Re??y",
+    "Ud?y Kiran Re??y",
+    "Uday Ki?an Re??y",
+    "Uday Kir?an Re??y",
+    "Uday Kiran Re??y",
+    "Uday Kiran Red*y",
+    "Uday Kiran Re?dy",
+    "Uday Kiran Red?y",
+]
+
+
+def name_unscramble_overlay_frames() -> list[str]:
+    """Scrambled states only (final name is the always-visible base layer)."""
+    final = FULL_NAME
+    frames = [s for s in NAME_UNSCRAMBLE_OVERLAY_FRAMES if len(s) == len(final)]
+    assert frames and frames[-1] != final, "overlays must not include settled name"
+    return frames
+
+
+def name_unscramble_svg(cx: float, y: float) -> str:
+    """SMIL name decode: base text is final name; overlays flash scrambled states once."""
+    overlays = name_unscramble_overlay_frames()
+    step = NAME_ANIM_STEP_MS
+    bits = [
+        f'<g id="profile-name-unscramble">',
+        text(
+            cx,
+            y,
+            FULL_NAME,
+            NAME_SIZE,
+            NAME,
+            NAME_WEIGHT,
+            family="JB",
+            anchor="middle",
+            letter_spacing=NAME_LETTER_SPACING,
+        ),
+    ]
+    for i, label in enumerate(overlays):
+        begin_s = (NAME_ANIM_START_MS + i * step) / 1000.0
+        dur_s = step / 1000.0
+        bits.append(
+            f'<text x="{cx:.2f}" y="{y:.2f}" fill="{NAME}" font-family="JB" '
+            f'font-size="{NAME_SIZE}" font-weight="{NAME_WEIGHT}" text-anchor="middle" '
+            f'letter-spacing="{NAME_LETTER_SPACING}" opacity="0" xml:space="preserve">'
+            f"{esc(label)}"
+            f'<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" '
+            f'dur="{dur_s:.3f}s" begin="{begin_s:.3f}s" fill="freeze"/>'
+            f"</text>"
+        )
+    bits.append("</g>")
+    return "\n".join(bits)
 
 
 def build_combo_profile_inner() -> tuple[str, float]:
@@ -682,19 +741,7 @@ def build_combo_profile_inner() -> tuple[str, float]:
     parts: list[str] = []
     y = float(PROFILE_NAME_TOP)
 
-    parts.append(
-        text(
-            cx,
-            y,
-            FULL_NAME,
-            40,
-            NAME,
-            600,
-            family="JB",
-            anchor="middle",
-            letter_spacing=0.5,
-        )
-    )
+    parts.append(name_unscramble_svg(cx, y))
     y += 36
     parts.append(
         text(cx, y, TAGLINE, 17, MUTED, 400, family="JB", anchor="middle", italic=True)
@@ -846,6 +893,103 @@ def build_profile_assets(out_dir: Path | None = None) -> None:
     print(f"Wrote profile assets under {out_dir}")
 
 
+def _chrome_screenshot_html(
+    html_path: Path,
+    dest: Path,
+    page_w: int,
+    page_h: int,
+    scale: int = 2,
+    virtual_time_ms: int = 0,
+) -> None:
+    chrome = Path("/opt/google/chrome/chrome")
+    if not chrome.exists():
+        chrome = Path("google-chrome")
+    png_tmp = dest.with_suffix(".raw.png")
+    cmd = [
+        str(chrome),
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--hide-scrollbars",
+        "--allow-file-access-from-files",
+        f"--force-device-scale-factor={scale}",
+        f"--window-size={page_w},{page_h}",
+        "--default-background-color=0d1117",
+        "--run-all-compositor-stages-before-draw",
+        f"--screenshot={png_tmp}",
+        html_path.resolve().as_uri(),
+    ]
+    if virtual_time_ms > 0:
+        cmd.insert(-1, f"--virtual-time-budget={virtual_time_ms}")
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+    if r.returncode != 0 or not png_tmp.exists():
+        raise RuntimeError(f"chrome failed: {r.returncode}\n{r.stdout}\n{r.stderr}")
+    from PIL import Image
+
+    im = Image.open(png_tmp)
+    im.save(dest, "PNG", optimize=True)
+    png_tmp.unlink(missing_ok=True)
+
+
+def verify_profile_name_animation(repo_root: Path) -> None:
+    """SMIL mid-frames via <object>; settled via <img> (non-SMIL default)."""
+    from PIL import Image, ImageChops
+    import numpy as np
+
+    artifact_dir = Path("/opt/cursor/artifacts")
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    svg_path = repo_root / "assets" / "profile-main.svg"
+    if not svg_path.exists():
+        build_profile_assets(repo_root / "assets")
+
+    _svg, h = build_profile_main_svg()
+    w = CONTENT_W
+    scale = 2
+
+    # Settled: <img> ignores SMIL → must match static final name only.
+    img_html = repo_root / "_name_settled_img.html"
+    img_html.write_text(
+        f"""<!DOCTYPE html><html><head><style>html,body{{margin:0;background:{PAGE}}}</style></head>
+<body style="width:{w}px"><img src="assets/profile-main.svg" width="{w}" alt="" /></body></html>""",
+        encoding="utf-8",
+    )
+    settled_img = artifact_dir / "profile-name-settled.png"
+    _chrome_screenshot_html(img_html, settled_img, w, h + 8, scale, 0)
+    img_html.unlink(missing_ok=True)
+
+    inline_svg = svg_path.read_text(encoding="utf-8")
+
+    def write_inline_anim_html(path: Path, budget_ms: int) -> None:
+        path.write_text(
+            f"""<!DOCTYPE html><html><head><style>html,body{{margin:0;background:{PAGE}}}</style></head>
+<body style="width:{w}px">{inline_svg}</body></html>""",
+            encoding="utf-8",
+        )
+
+    # Mid-animation via inlined SVG (SMIL runs; <img> does not).
+    for budget_ms, out_name in ((220, "profile-name-mid-scramble-220ms.png"), (440, "profile-name-mid-scramble-440ms.png")):
+        obj_html = repo_root / f"_name_anim_{budget_ms}.html"
+        write_inline_anim_html(obj_html, budget_ms)
+        _chrome_screenshot_html(obj_html, artifact_dir / out_name, w, h + 8, scale, budget_ms)
+        obj_html.unlink(missing_ok=True)
+
+    settled_smil = artifact_dir / "profile-name-settled-smil.png"
+    obj_html = repo_root / "_name_settled_smil.html"
+    write_inline_anim_html(obj_html, 1300)
+    _chrome_screenshot_html(obj_html, settled_smil, w, h + 8, scale, 1300)
+    obj_html.unlink(missing_ok=True)
+
+    diff = ImageChops.difference(
+        Image.open(settled_img).convert("RGB"),
+        Image.open(settled_smil).convert("RGB"),
+    )
+    mean = float(np.array(diff).mean())
+    print(f"name settled img vs SMIL end diff mean: {mean:.4f}")
+    mid_primary = artifact_dir / "profile-name-mid-scramble.png"
+    mid_primary.unlink(missing_ok=True)
+    (artifact_dir / "profile-name-mid-scramble-220ms.png").replace(mid_primary)
+
+
 def render_readme_preview(
     repo_root: Path, dest: Path, page_w: int = 1012, scale: int = 2
 ) -> None:
@@ -995,6 +1139,7 @@ def main():
         artifact = Path("/opt/cursor/artifacts/readme-profile-verify.png")
         artifact.parent.mkdir(parents=True, exist_ok=True)
         render_readme_preview(repo, artifact)
+        verify_profile_name_animation(repo)
         ref = Path(
             "/home/ubuntu/.cursor/projects/agent-repos-UdaykiranReddy-1/assets/04-combo.png"
         )

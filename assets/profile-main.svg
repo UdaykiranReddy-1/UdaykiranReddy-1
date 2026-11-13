@@ -27,7 +27,17 @@ text { font-synthesis: none; }
 </defs>
 
 <rect x="104.00" y="-8.00" width="992.00" height="384.00" rx="0" fill="#0d1117" />
+<g id="profile-name-unscramble">
 <text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" xml:space="preserve">Uday Kiran Reddy</text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">U#4y K!r@n R3d*y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.010s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Ud?y Ki?an Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.120s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Ud?y Kiran Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.230s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Ki?an Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.340s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Re??y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.450s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Red*y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.560s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Re?dy<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.670s" fill="freeze"/></text>
+<text x="600.00" y="24.00" fill="#f0f6fc" font-family="JB" font-size="40" font-weight="600" text-anchor="middle" letter-spacing="0.5" opacity="0" xml:space="preserve">Uday Kiran Red?y<animate attributeName="opacity" values="0;1;0" keyTimes="0;0.42;1" dur="0.110s" begin="0.780s" fill="freeze"/></text>
+</g>
 <text x="600.00" y="60.00" fill="#8b949e" font-family="JB" font-size="17" font-weight="400" text-anchor="middle" font-style="italic" xml:space="preserve">I code and decode stuff</text>
 <text x="600.00" y="86.00" fill="#6e7681" font-family="JB" font-size="13" font-weight="400" text-anchor="middle" xml:space="preserve">Full-Stack Developer  ·  Bangalore, India</text>
 <line x1="564.00" y1="122.00" x2="636.00" y2="122.00" stroke="#30363d" stroke-width="1" stroke-linecap="round" />
